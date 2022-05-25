@@ -1,12 +1,14 @@
 
 import pygame
+from fonts import FONT_MASHEEN_30, FONT_MASHEEN_BOLD_40
 
 SCREEN = pygame.display.set_mode((800, 600))
 
 class VersusScreen:
     def __init__(self, players: list):
         self.load_bg_graphics()
-        self.load_player_graphics(players)
+        self.players = players
+        self.load_player_graphics()
         self.sparks_position = [-2327, -503]
         self.sparks_move_speed = 6
 
@@ -15,9 +17,9 @@ class VersusScreen:
         self.sparks = pygame.image.load("graphics/versus_screen/vsScreen_sparks.png").convert_alpha()
 
 
-    def load_player_graphics(self, players):
+    def load_player_graphics(self):
         self.player_graphics = []
-        for player in players:
+        for player in self.players:
             self.player_graphics.append(pygame.image.load(f"graphics/player/{player}/vs_screen/{player}_vs_screen.png"))
 
     def move_sparks(self):
@@ -45,3 +47,29 @@ class VersusScreen:
             elif i == 3:
                 x = 560
             SCREEN.blit(self.player_graphics[i], (x, 0))
+
+        # player text
+        Y = 450
+        x_player_name = [110, 310, 510, 710]
+        x_counter = 0
+        for player in self.players:
+            if player == "mar":
+                player = "Mario"
+            elif player == "lui":
+                player = "Luigi"
+            elif player == "pea":
+                player = "Peach"
+            elif player == "yos":
+                player = "Yoshi"
+            player_text_surface = FONT_MASHEEN_30.render(player, False, (240, 240, 240))
+            player_text_surface_rect = player_text_surface.get_rect(center=(x_player_name[x_counter], Y))
+            x_counter += 1
+            SCREEN.blit(player_text_surface, player_text_surface_rect)
+
+        # vs text
+        vs_text_surface = FONT_MASHEEN_BOLD_40.render("VS", False, (223, 0, 0))
+        x_vs_text = [210, 410, 610]
+        for x in x_vs_text:
+            vs_text_surface_rect = vs_text_surface.get_rect(center=(x, Y))
+            SCREEN.blit(vs_text_surface, vs_text_surface_rect)
+

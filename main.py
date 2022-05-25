@@ -12,9 +12,10 @@ Original Game (included in Mario Party 6) by Hudson Soft™ and Nintendo™
 '''
 
 import pygame, sys
+pygame.init()
 from versus_screen import VersusScreen
 
-pygame.init()
+
 
 ##----------------------------DISPLAY SCREEN----------------------------##
 

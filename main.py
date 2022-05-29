@@ -3,10 +3,10 @@
 
 Imagine Nintendo's Super Mario IP would have been heavily influenced by the 1993 theatrical movie Super Mario Bros.
 (https://en.wikipedia.org/wiki/Super_Mario_Bros._(film)) and the Mario Party games would more be like a kind of
-violent battle royal as seen in the 1987 movie The Running Man with Arnold Schwarzenegger (https://en.wikipedia.org/wiki/The_Running_Man_(1987_film)).
+violent battle royal as seen in the 1987 movie The Running Man (https://en.wikipedia.org/wiki/The_Running_Man_(1987_film)).
 
 Code and graphics by Kevin Spathmann (Pfeifenreiniger on GitHub: https://github.com/Pfeifenreiniger)
-Fonts used: ?????
+Fonts used: Masheen from fontsov.com (https://fontsov.com/font/masheen21695.html)
 Musics, SFX, and voices used ????
 Original Game (included in Mario Party 6) by Hudson Soft™ and Nintendo™
 '''
@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 FPS = 30
 
 ##----------------------------VS SCREEN----------------------------##
-players = ["mar", "mar", "mar", "mar"]
+players = ["mar", "lui", "mar", "mar"]
 vs_screen = VersusScreen(players)
 
 ##----------------------------GAMELOOP----------------------------##

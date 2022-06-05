@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 FPS = 30
 
 ##----------------------------VS SCREEN----------------------------##
-players = ["mar", "lui", "mar", "mar"]
+players = ["mar", "lui", "pea", "mar"]
 vs_screen = VersusScreen(players)
 
 ##----------------------------GAMELOOP----------------------------##

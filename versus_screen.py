@@ -1,8 +1,10 @@
 
 import pygame
 from fonts import FONT_MASHEEN_30, FONT_MASHEEN_BOLD_40
+from fonts import render
 
 SCREEN = pygame.display.set_mode((800, 600))
+
 
 class VersusScreen:
     def __init__(self, players: list):
@@ -61,13 +63,13 @@ class VersusScreen:
                 player = "Peach"
             elif player == "yos":
                 player = "Yoshi"
-            player_text_surface = FONT_MASHEEN_30.render(player, False, (240, 240, 240))
+            player_text_surface = render(player, FONT_MASHEEN_30, (240, 240, 240), (48, 48, 48), 2)
             player_text_surface_rect = player_text_surface.get_rect(center=(x_player_name[x_counter], Y))
             x_counter += 1
             SCREEN.blit(player_text_surface, player_text_surface_rect)
 
         # vs text
-        vs_text_surface = FONT_MASHEEN_BOLD_40.render("VS", False, (223, 0, 0))
+        vs_text_surface = render("VS", FONT_MASHEEN_BOLD_40, (223, 0, 0), (48, 48, 48), 2)
         x_vs_text = [210, 410, 610]
         for x in x_vs_text:
             vs_text_surface_rect = vs_text_surface.get_rect(center=(x, Y))

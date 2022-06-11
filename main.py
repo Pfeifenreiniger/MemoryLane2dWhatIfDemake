@@ -11,7 +11,7 @@ Musics, SFX, and voices used ????
 Original Game (included in Mario Party 6) by Hudson Soft™ and Nintendo™
 '''
 
-import pygame, sys
+import pygame, sys, random
 pygame.init()
 from versus_screen import VersusScreen
 
@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 FPS = 30
 
 ##----------------------------VS SCREEN----------------------------##
-players = ["mar", "lui", "pea", "mar"]
+players = ["mar", "yos", "pea", "lui"]
 vs_screen = VersusScreen(players)
 
 ##----------------------------GAMELOOP----------------------------##

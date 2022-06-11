@@ -41,13 +41,25 @@ class VersusScreen:
         # player graphics
         for i in range(4):
             if i == 0:
-                x = -40
+                if self.players[i] == "yos":
+                    x = 0
+                else:
+                    x = -40
             elif i == 1:
-                x = 160
+                if self.players[i] == "yos":
+                    x = 200
+                else:
+                    x = 160
             elif i == 2:
-                x = 360
+                if self.players[i] == "yos":
+                    x = 400
+                else:
+                    x = 360
             elif i == 3:
-                x = 560
+                if self.players[i] == "yos":
+                    x = 600
+                else:
+                    x = 560
             SCREEN.blit(self.player_graphics[i], (x, 0))
 
         # player text

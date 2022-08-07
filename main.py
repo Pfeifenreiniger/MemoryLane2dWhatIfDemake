@@ -13,9 +13,6 @@ Original Game (included in Mario Party 6) by Hudson Soft™ and Nintendo™
 
 import pygame, sys, random
 pygame.init()
-from versus_screen import VersusScreen
-
-
 
 ##----------------------------DISPLAY SCREEN----------------------------##
 
@@ -27,24 +24,35 @@ pygame.display.set_caption("Memory Lane 2D What-If-Demake")
 clock = pygame.time.Clock()
 FPS = 30
 
-##----------------------------VS SCREEN----------------------------##
-players = ["mar", "yos", "pea", "lui"]
-vs_screen = VersusScreen(players)
 
-##----------------------------GAMELOOP----------------------------##
-running = True
+##----------------------------MAIN CLASS----------------------------##
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            pygame.quit()
-            sys.exit()
+class Main:
+    ##---------MAIN METHOD---------##
+    @staticmethod
+    def run_game():
 
-    vs_screen.draw()
+        from versus_screen import VersusScreen
+
+        players = ["mar", "yos", "pea", "lui"]
+        vs_screen = VersusScreen(players)
+
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.quit()
+                    sys.exit()
+
+            vs_screen.draw()
 
 
 
-    pygame.display.set_caption("Memory Lane 2D What-If-Demake | " + str(round(clock.get_fps())) + " FPS")
-    pygame.display.update()
-    clock.tick(FPS)
+            pygame.display.set_caption("Memory Lane 2D What-If-Demake | " + str(round(clock.get_fps())) + " FPS")
+            pygame.display.update()
+            clock.tick(FPS)
+
+if __name__ == "__main__":
+    Main.run_game()

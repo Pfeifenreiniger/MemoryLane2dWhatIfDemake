@@ -1,5 +1,6 @@
 
-import pygame
+
+from main import pygame
 
 # used fonts
 FONT_MASHEEN_30 = pygame.font.Font("fonts/masheen/masheen.ttf", 30)

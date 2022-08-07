@@ -1,9 +1,8 @@
 
-import pygame
+from main import pygame, SCREEN
+
 from fonts import FONT_MASHEEN_30, FONT_MASHEEN_BOLD_40
 from fonts import render
-
-SCREEN = pygame.display.set_mode((800, 600))
 
 
 class VersusScreen:

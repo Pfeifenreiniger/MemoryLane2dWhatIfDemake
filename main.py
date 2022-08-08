@@ -33,9 +33,11 @@ class Main:
     def run_game():
 
         from versus_screen import VersusScreen
+        from stage import Stage
 
         players = ["mar", "yos", "pea", "lui"]
         vs_screen = VersusScreen(players)
+        stage = Stage()
 
         running = True
 
@@ -46,7 +48,8 @@ class Main:
                     pygame.quit()
                     sys.exit()
 
-            vs_screen.draw()
+            # vs_screen.draw()
+            stage.draw_elements()
 
 
 

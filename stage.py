@@ -71,9 +71,10 @@ class Stage:
 
             self.fire_snake_pos = (532, 284)
 
+            self.parts_frame = 1
             self.parts = {
                 1: pygame.image.load("graphics/stage/neon_signs/right/parts/parts_f1.png").convert_alpha(),
-                2: pygame.image.load("graphics/stage/neon_signs/right/parts/parts_f1.png").convert_alpha()
+                2: pygame.image.load("graphics/stage/neon_signs/right/parts/parts_f2.png").convert_alpha()
             }
 
             self.parts_pos = (585, 5)
@@ -83,6 +84,8 @@ class Stage:
 
             # left plant
 
+            self.piranha_plant_frame_left = 1
+            self.piranha_plant_left_frames_forwards = True
             self.piranha_plant_left = {}
 
             for i in range(3):
@@ -93,6 +96,8 @@ class Stage:
 
             # right plant
 
+            self.piranha_plant_frame_right = 2
+            self.piranha_plant_right_frames_forwards = True
             self.piranha_plant_right = {}
 
             for i in range(3):
@@ -120,6 +125,9 @@ class Stage:
             self.tiles_f2 = load_tiles_loop(self.tiles_f2, "f2")
             self.tiles_f3 = load_tiles_loop(self.tiles_f3, "f3")
             self.tiles_f4 = load_tiles_loop(self.tiles_f4, "f4")
+            self.tiles_frames = [self.tiles_f1, self.tiles_f2, self.tiles_f3, self.tiles_f4]
+            self.tiles_frames_no = 0
+            self.tiles_frames_forwards = True
             self.tiles_corr = load_tiles_loop(self.tiles_corr, "corr")
 
             self.tiles_pos = {
@@ -166,14 +174,14 @@ class Stage:
                 41 : (429, 213),
                 42 : (491, 213),
                 43 : (551, 213),
-                44 : (185, 183),
-                45 : (246, 183),
-                46 : (306, 183),
-                47 : (367, 183),
-                48 : (428, 183),
-                49 : (486, 183),
-                50 : (544, 183),
-                51 : (368, 157)
+                44 : (185, 184),
+                45 : (246, 184),
+                46 : (306, 184),
+                47 : (367, 184),
+                48 : (428, 184),
+                49 : (486, 184),
+                50 : (544, 184),
+                51 : (368, 158)
             }
 
             self.stepping_stone = pygame.image.load("graphics/stage/tiles/steppingStone.png").convert_alpha()
@@ -208,6 +216,23 @@ class Stage:
         def draw_bg():
             SCREEN.blit(self.bg, self.bg_pos)
 
+        def draw_trails():
+            SCREEN.blit(self.trails, self.trails_pos)
+
+        def draw_neon_signs():
+            # left signs
+            SCREEN.blit(self.bullet_bills[2 if random.randint(1, 100) <= 2 else 1], self.bullet_bills_pos)
+
+            SCREEN.blit(self.vote_for_koopa[2 if random.randint(1, 100) <= 2 else 1], self.vote_for_koopa_pos)
+
+            # right signs
+            SCREEN.blit(self.fire_snake[2 if random.randint(1, 100) <= 2 else 1], self.fire_snake_pos)
+
+            if round(self.parts_frame + 0.05) > 2:
+                self.parts_frame = 1
+            else: self.parts_frame += 0.05
+            SCREEN.blit(self.parts[round(self.parts_frame)], self.parts_pos)
+
         def draw_chains():
             for i in range(5):
                 rotated_img_left = pygame.transform.rotate(self.chains_left[i], round(self.rotate_angles[i]))
@@ -228,7 +253,152 @@ class Stage:
                 else:
                     self.rotate_angles[i] -= 0.08
 
+        def draw_tower():
+            SCREEN.blit(self.tower[2 if random.randint(1, 100) <= 3 else 1], self.tower_pos)
 
+        def draw_piranha_plants():
+            # plant left
+            if self.piranha_plant_left_frames_forwards:
+                if round(self.piranha_plant_frame_left + 0.1) > 3:
+                    self.piranha_plant_left_frames_forwards = False
+                else: self.piranha_plant_frame_left += 0.1
+            else:
+                if round(self.piranha_plant_frame_left - 0.1) < 1:
+                    self.piranha_plant_left_frames_forwards = True
+                else: self.piranha_plant_frame_left -= 0.1
+
+            SCREEN.blit(self.piranha_plant_left[round(self.piranha_plant_frame_left)], self.piranha_plant_left_pos)
+
+            # plant right
+            if self.piranha_plant_right_frames_forwards:
+                if round(self.piranha_plant_frame_right + 0.1) > 3:
+                    self.piranha_plant_right_frames_forwards = False
+                else: self.piranha_plant_frame_right += 0.1
+            else:
+                if round(self.piranha_plant_frame_right - 0.1) < 1:
+                    self.piranha_plant_right_frames_forwards = True
+                else: self.piranha_plant_frame_right -= 0.1
+
+            SCREEN.blit(self.piranha_plant_right[round(self.piranha_plant_frame_right)], self.piranha_plant_right_pos)
+
+        def draw_tiles():
+
+            SCREEN.blit(self.stepping_stone, self.stepping_stone_pos)
+
+            if self.tiles_frames_forwards:
+                if round(self.tiles_frames_no + 0.06) > 3:
+                    self.tiles_frames_forwards = False
+                else: self.tiles_frames_no += 0.06
+            else:
+                if round(self.tiles_frames_no - 0.06) < 0:
+                    self.tiles_frames_forwards = True
+                else: self.tiles_frames_no -= 0.06
+
+            for no, tile in self.tiles_frames[round(self.tiles_frames_no)].items():
+                SCREEN.blit(tile, self.tiles_pos[no])
 
         draw_bg()
+        draw_trails()
+        draw_neon_signs()
         draw_chains()
+        draw_tower()
+        draw_piranha_plants()
+        draw_tiles()
+
+
+class ShyGuy:
+    def __init__(self):
+        self.sprites = self.load_sprites()
+        self.x = 365
+        self.y = 520
+        self.animation_frame = 1
+        self.current_dir = "stand_down" # je nach Bewegungsrichtung aendert sich die current_dir
+
+    def load_sprites(self) -> dict:
+
+        run_left = {
+            1: "",
+            2: "",
+            3: "",
+            4: "",
+        }
+
+        run_right = {
+            1: "",
+            2: "",
+            3: "",
+            4: ""
+        }
+
+        run_up = {
+            1: "",
+            2: "",
+            3: "",
+            4: ""
+        }
+
+        stand_down = {
+            1: "",
+            2: ""
+        }
+
+        stand_left = {
+            1: "",
+            2: ""
+        }
+
+        stand_right = {
+            1: "",
+            2: ""
+        }
+
+        stand_up = {
+            1: "",
+            2: ""
+        }
+
+        shy_sprites = {
+            "run_left" : run_left,
+            "run_right" : run_right,
+            "run_up" : run_up,
+            "stand_down" : stand_down,
+            "stand_left" : stand_left,
+            "stand_right" : stand_right,
+            "stand_up" : stand_up,
+            "shadow" : pygame.image.load("graphics/shadow.png").convert_alpha()
+        }
+
+        shy_sprites["shadow"].set_alpha(128)
+
+        # dir for file directory
+        for dir in shy_sprites.keys():
+            if not dir.startswith("shadow"):
+                if dir.startswith("run_"):
+                    j = 4
+                else:
+                    j = 2
+
+                for i in range(j):
+                    img = pygame.image.load(f"graphics/stage/shy/{dir}/shy_{dir}_f{i+1}.png").convert_alpha()
+                    shy_sprites[dir][i+1] = img
+
+        return shy_sprites
+
+    def animation(self):
+        if self.current_dir.startswith("run_"):
+            if self.animation_frame + 0.1 > 4:
+                self.animation_frame = 1
+            else: self.animation_frame += 0.1
+        else:
+            if self.animation_frame + 0.07 > 2:
+                self.animation_frame = 1
+            else: self.animation_frame += 0.07
+
+    def draw_sprites(self):
+
+        # draw shadow
+        SCREEN.blit(self.sprites["shadow"], (self.x, self.y+60))
+
+        self.animation()
+        SCREEN.blit(self.sprites["stand_down"][round(self.animation_frame)], (self.x, self.y))
+

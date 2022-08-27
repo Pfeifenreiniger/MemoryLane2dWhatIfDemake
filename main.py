@@ -51,8 +51,9 @@ class Main:
                     sys.exit()
 
             # vs_screen.draw()
+            stage.get_correct_tiles(shyguy.my_path)
             stage.draw_elements()
-            shyguy.draw_sprites()
+            shyguy.update()
 
 
 

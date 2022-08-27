@@ -1,11 +1,11 @@
 
-import random
-from main import pygame, SCREEN
+from main import pygame, SCREEN, random
 
 
 class Stage:
     def __init__(self):
         self.load_elements()
+        self.correct_tiles = []
         self.draw_elements()
 
     def load_elements(self):
@@ -297,6 +297,10 @@ class Stage:
             for no, tile in self.tiles_frames[round(self.tiles_frames_no)].items():
                 SCREEN.blit(tile, self.tiles_pos[no])
 
+            if len(self.correct_tiles) > 0:
+                for tile in self.correct_tiles:
+                    SCREEN.blit(self.tiles_corr[tile], self.tiles_pos[tile])
+
         draw_bg()
         draw_trails()
         draw_neon_signs()
@@ -305,57 +309,63 @@ class Stage:
         draw_piranha_plants()
         draw_tiles()
 
+    def get_correct_tiles(self, correct_tiles: list):
+        if len(correct_tiles) > 0:
+            for tile in correct_tiles:
+                if tile not in self.correct_tiles:
+                    self.correct_tiles.append(tile)
+
+
+from tiles_field_borders import *
 
 class ShyGuy:
+
     def __init__(self):
         self.sprites = self.load_sprites()
         self.x = 365
         self.y = 520
+        self.move_speed = 3
         self.animation_frame = 1
+        self.run_frames_up = True
         self.current_dir = "stand_down" # je nach Bewegungsrichtung aendert sich die current_dir
+        self.current_tile = 1
+        self.current_row = 1
+        self.row_1_to_2 = False
+        self.row_2_to_3 = False
+        self.row_3_to_4 = False
+        self.row_4_to_5 = False
+        self.row_5_to_6 = False
+        self.row_6_to_7 = False
+        self.row_7_to_8 = False
+        self.row_8_to_9 = False
+        self.current_column = 1
+        self.load_rect()
+        self.path = self.calculate_path()
+        self.my_path = []
+        self.scaled = False
+
+    def load_rect(self):
+        self.rect = pygame.rect.Rect((
+                self.x + (self.sprites[self.current_dir][round(self.animation_frame)].get_width() / 3)), # x pos
+                self.y + (self.sprites[self.current_dir][round(self.animation_frame)].get_height() / 1.2), # y pos
+                (self.sprites[self.current_dir][round(self.animation_frame)].get_width() / 3), # width
+                (self.sprites[self.current_dir][round(self.animation_frame)].get_height() / 5)) # height
 
     def load_sprites(self) -> dict:
 
-        run_left = {
-            1: "",
-            2: "",
-            3: "",
-            4: "",
-        }
+        run_left = {}
 
-        run_right = {
-            1: "",
-            2: "",
-            3: "",
-            4: ""
-        }
+        run_right = {}
 
-        run_up = {
-            1: "",
-            2: "",
-            3: "",
-            4: ""
-        }
+        run_up = {}
 
-        stand_down = {
-            1: "",
-            2: ""
-        }
+        stand_down = {}
 
-        stand_left = {
-            1: "",
-            2: ""
-        }
+        stand_left = {}
 
-        stand_right = {
-            1: "",
-            2: ""
-        }
+        stand_right = {}
 
-        stand_up = {
-            1: "",
-            2: ""
-        }
+        stand_up = {}
 
         shy_sprites = {
             "run_left" : run_left,
@@ -386,19 +396,251 @@ class ShyGuy:
 
     def animation(self):
         if self.current_dir.startswith("run_"):
-            if self.animation_frame + 0.1 > 4:
-                self.animation_frame = 1
-            else: self.animation_frame += 0.1
+            if self.run_frames_up:
+                if round(self.animation_frame + 0.2) > 4:
+                    self.run_frames_up = False
+                else: self.animation_frame += 0.2
+            else:
+                if round(self.animation_frame - 0.2) < 1:
+                    self.run_frames_up = True
+                else: self.animation_frame -= 0.2
         else:
-            if self.animation_frame + 0.07 > 2:
+            if round(self.animation_frame + 0.07) > 2:
                 self.animation_frame = 1
             else: self.animation_frame += 0.07
 
     def draw_sprites(self):
 
-        # draw shadow
-        SCREEN.blit(self.sprites["shadow"], (self.x, self.y+60))
-
         self.animation()
-        SCREEN.blit(self.sprites["stand_down"][round(self.animation_frame)], (self.x, self.y))
+
+        # draw shadow
+        SCREEN.blit(self.sprites["shadow"], (self.rect.left - (self.sprites[self.current_dir][round(self.animation_frame)].get_width() / 4),
+                                             self.rect.top + (self.sprites[self.current_dir][round(self.animation_frame)].get_height() / 12)))
+
+        # scale
+        if self.scaled != True:
+            self.scaled = True
+
+            # run sprites
+            runs = ["run_left", "run_right", "run_up"]
+            for i in range(4):
+                for run in runs:
+                    self.sprites[run][i+1] = pygame.transform.scale(self.sprites[run][i+1], (self.sprites[run][i+1].get_width() - 1.2, self.sprites[run][i+1].get_height() - 1.2))
+
+            # stand sprites
+            stands = ["stand_left", "stand_right", "stand_up", "stand_down"]
+            for i in range(2):
+                for stand in stands:
+                    self.sprites[stand][i + 1] = pygame.transform.scale(self.sprites[stand][i + 1], (self.sprites[stand][i + 1].get_width() - 1.2, self.sprites[stand][i + 1].get_height() - 1.2))
+
+            self.sprites["shadow"] = pygame.transform.smoothscale(self.sprites["shadow"], (self.sprites["shadow"].get_width() - 2, self.sprites["shadow"].get_height() - 2))
+
+        # draw current shyguy sprite
+        SCREEN.blit(self.sprites[self.current_dir][round(self.animation_frame)], (self.x, self.y))
+
+        # pygame.draw.rect(SCREEN, (000, 000, 000), self.rect)
+
+    def calculate_path(self) -> dict:
+
+        # key = row no, value = walk to this tile no horizontally
+        path = {
+            1 : 1,
+            2 : random.randint(2, 8),
+            3 : random.randint(9, 15),
+            4 : random.randint(16, 22),
+            5 : random.randint(23, 29),
+            6 : random.randint(30, 36),
+            7 : random.randint(37, 43),
+            8 : 47,
+            9 : 51
+        }
+
+        return path
+
+    def record_my_path(self, tile: int):
+
+        if tile not in self.my_path:
+            self.my_path.append(tile)
+
+    def check_current_row(self):
+
+        def calc_diff_vertically(current_row: int, next_row: int) -> int:
+            return round(abs(borders[next_row]["upper"] - borders[current_row]["upper"]))
+
+        def switch_tile():
+            if self.current_row > 1 and self.current_row < 8:
+                self.current_tile = self.current_tile + 7
+            elif self.current_row == 1:
+                self.current_tile = 5
+            else:
+                self.current_tile = 51
+
+        if self.rect.bottom < (borders[8]["upper"] - (calc_diff_vertically(8, 9) / 2)) and self.row_8_to_9 != True:
+            switch_tile()
+            self.current_row = 9
+            self.scaled = False
+            self.row_8_to_9 = True
+        elif self.rect.bottom < (borders[7]["upper"] - (calc_diff_vertically(7, 8) / 3)) and self.row_7_to_8 != True:
+            switch_tile()
+            self.current_row = 8
+            self.scaled = False
+            self.row_7_to_8 = True
+        elif self.rect.bottom < (borders[6]["upper"] - (calc_diff_vertically(6, 7) / 4)) and self.row_6_to_7 != True:
+            switch_tile()
+            self.current_row = 7
+            self.scaled = False
+            self.row_6_to_7 = True
+        elif self.rect.bottom < (borders[5]["upper"] - (calc_diff_vertically(5, 6) / 4)) and self.row_5_to_6 != True:
+            switch_tile()
+            self.current_row = 6
+            self.scaled = False
+            self.row_5_to_6 = True
+        elif self.rect.bottom < (borders[4]["upper"] - (calc_diff_vertically(4, 5) / 4)) and self.row_4_to_5 != True:
+            switch_tile()
+            self.current_row = 5
+            self.scaled = False
+            self.row_4_to_5 = True
+        elif self.rect.bottom < (borders[3]["upper"] - (calc_diff_vertically(3, 4) / 4)) and self.row_3_to_4 != True:
+            switch_tile()
+            self.current_row = 4
+            self.scaled = False
+            self.row_3_to_4 = True
+        elif self.rect.bottom < (borders[2]["upper"] - (calc_diff_vertically(2, 3) / 4)) and self.row_2_to_3 != True:
+            switch_tile()
+            self.current_row = 3
+            self.scaled = False
+            self.row_2_to_3 = True
+        elif self.rect.bottom < (borders[1]["upper"] - (calc_diff_vertically(1, 2) / 4)) and self.row_1_to_2 != True:
+            switch_tile()
+            self.current_row = 2
+            self.scaled = False
+            self.row_1_to_2 = True
+
+    def check_current_column(self):
+        if self.current_tile == 2 or self.current_tile == 9 or self.current_tile == 16 or self.current_tile == 23\
+                or self.current_tile == 30 or self.current_tile == 37 or self.current_tile == 44:
+            self.current_column = 1
+        elif self.current_tile == 3 or self.current_tile == 10 or self.current_tile == 17 or self.current_tile == 24\
+                or self.current_tile == 31 or self.current_tile == 38 or self.current_tile == 45:
+            self.current_column = 2
+        elif self.current_tile == 4 or self.current_tile == 11 or self.current_tile == 18 or self.current_tile == 25 \
+                or self.current_tile == 32 or self.current_tile == 39 or self.current_tile == 46:
+            self.current_column = 3
+        elif self.current_tile == 5 or self.current_tile == 12 or self.current_tile == 19 or self.current_tile == 26 \
+                or self.current_tile == 33 or self.current_tile == 40 or self.current_tile == 47 or self.current_tile == 51:
+            self.current_column = 4
+        elif self.current_tile == 6 or self.current_tile == 13 or self.current_tile == 20 or self.current_tile == 27 \
+                or self.current_tile == 34 or self.current_tile == 41 or self.current_tile == 48:
+            self.current_column = 5
+        elif self.current_tile == 7 or self.current_tile == 14 or self.current_tile == 21 or self.current_tile == 28 \
+                or self.current_tile == 35 or self.current_tile == 42 or self.current_tile == 49:
+            self.current_column = 6
+        elif self.current_tile == 8 or self.current_tile == 15 or self.current_tile == 22 or self.current_tile == 29 \
+                or self.current_tile == 36 or self.current_tile == 43 or self.current_tile == 50:
+            self.current_column = 7
+
+    def check_current_tile(self):
+
+        def calc_diff_horizontally(tile : int, next_tile: int) -> int:
+            try:
+                return round(abs(borders[self.current_row][f"tile_{next_tile}"] - borders[self.current_row][f"tile_{tile}"]))
+            except KeyError:
+                return 0
+
+        from_number = 0
+        to_number = 0
+
+        if not self.current_dir.endswith("_up"):
+
+            if self.current_row == 2:
+                from_number = 2
+                to_number = 8
+            elif self.current_row == 3:
+                from_number = 9
+                to_number = 15
+            elif self.current_row == 4:
+                from_number = 16
+                to_number = 22
+            elif self.current_row == 5:
+                from_number = 23
+                to_number = 29
+            elif self.current_row == 6:
+                from_number = 30
+                to_number = 36
+            elif self.current_row == 7:
+                from_number = 37
+                to_number = 43
+            elif self.current_row == 8:
+                from_number = 44
+                to_number = 50
+            elif self.current_row == 9:
+                self.current_tile = 51
+
+            if self.current_row != 9 and self.current_row != 1:
+                for tile in range(from_number, to_number):
+                    # runs right
+                    if self.current_dir.endswith("_right") and self.current_tile != to_number:
+                        if self.rect.left > (borders[self.current_row][f"tile_{to_number-1}"] + (calc_diff_horizontally(to_number-1, to_number) / 4)):
+                            self.current_tile = to_number
+                            break
+                        elif self.rect.left < (borders[self.current_row][f"tile_{tile}"] + (calc_diff_horizontally(tile, tile+1) / 4)):
+                            self.current_tile = tile
+                            break
+                    # runs left
+                    if self.current_dir.endswith("_left") and self.current_tile != from_number:
+                        if self.rect.right < (borders[self.current_row][f"tile_{from_number}"] - (calc_diff_horizontally(from_number, from_number+1) / 4)):
+                            self.current_tile = from_number
+                            break
+                        if self.current_tile != from_number + 1:
+                            if self.rect.right < (borders[self.current_row][f"tile_{tile}"] - (calc_diff_horizontally(tile, tile-1) / 4)):
+                                self.current_tile = tile
+                                break
+
+
+    def move(self):
+
+        def move_up(column: int = 4):
+            self.current_dir = "run_up"
+            self.y -= self.move_speed
+
+            match column:
+                case 1: self.x += 0.8
+                case 2: self.x += 0.6
+                case 3: self.x += 0.4
+                case 5: self.x -= 0.4
+                case 6: self.x -= 0.6
+                case 7: self.x -= 0.8
+
+        def move_right():
+            self.current_dir = "run_right"
+            self.x += self.move_speed
+
+        def move_left():
+            self.current_dir = "run_left"
+            self.x -= self.move_speed
+
+        self.check_current_row()
+        self.check_current_column()
+        self.check_current_tile()
+
+        if self.current_row == 1:
+            move_up()
+        elif self.current_row == 9:
+            self.current_dir = "stand_down"
+        else:
+            for i in range(2, 9):
+                if i == self.current_row:
+                    if self.current_tile == self.path[i]:
+                        move_up(self.current_column)
+                    else:
+                        if self.current_tile < self.path[i]:
+                            move_right()
+                        else:
+                            move_left()
+
+    def update(self):
+        self.load_rect()
+        self.move()
+        self.record_my_path(self.current_tile)
+        self.draw_sprites()
 

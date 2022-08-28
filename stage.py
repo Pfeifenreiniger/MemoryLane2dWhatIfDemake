@@ -324,8 +324,10 @@ class ShyGuy:
         self.sprites = self.load_sprites()
         self.x = 365
         self.y = 520
-        self.move_speed = 3
+        self.move_speed = 4
         self.animation_frame = 1
+        self.animation_count_run = 0.25
+        self.animation_count_stand = 0.1
         self.run_frames_up = True
         self.current_dir = "stand_down" # je nach Bewegungsrichtung aendert sich die current_dir
         self.current_tile = 1
@@ -397,17 +399,17 @@ class ShyGuy:
     def animation(self):
         if self.current_dir.startswith("run_"):
             if self.run_frames_up:
-                if round(self.animation_frame + 0.2) > 4:
+                if round(self.animation_frame + self.animation_count_run) > 4:
                     self.run_frames_up = False
-                else: self.animation_frame += 0.2
+                else: self.animation_frame += self.animation_count_run
             else:
-                if round(self.animation_frame - 0.2) < 1:
+                if round(self.animation_frame - self.animation_count_run) < 1:
                     self.run_frames_up = True
-                else: self.animation_frame -= 0.2
+                else: self.animation_frame -= self.animation_count_run
         else:
-            if round(self.animation_frame + 0.07) > 2:
+            if round(self.animation_frame + self.animation_count_stand) > 2:
                 self.animation_frame = 1
-            else: self.animation_frame += 0.07
+            else: self.animation_frame += self.animation_count_stand
 
     def draw_sprites(self):
 
@@ -604,12 +606,12 @@ class ShyGuy:
             self.y -= self.move_speed
 
             match column:
-                case 1: self.x += 0.8
-                case 2: self.x += 0.6
-                case 3: self.x += 0.4
-                case 5: self.x -= 0.4
-                case 6: self.x -= 0.6
-                case 7: self.x -= 0.8
+                case 1: self.x += 0.8 if self.current_row < 6 else 0.7
+                case 2: self.x += 0.7 if self.current_row < 6 else 0.6
+                case 3: self.x += 0.6 if self.current_row < 6 else 0.5
+                case 5: self.x -= 0.6 if self.current_row < 6 else 0.5
+                case 6: self.x -= 0.7 if self.current_row < 6 else 0.6
+                case 7: self.x -= 0.8 if self.current_row < 6 else 0.7
 
         def move_right():
             self.current_dir = "run_right"
@@ -618,6 +620,10 @@ class ShyGuy:
         def move_left():
             self.current_dir = "run_left"
             self.x -= self.move_speed
+
+        if self.current_row > 5:
+            self.move_speed = 3
+            self.animation_count_run = 0.2
 
         self.check_current_row()
         self.check_current_column()

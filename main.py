@@ -34,12 +34,24 @@ class Main:
 
         from versus_screen import VersusScreen
         from stage import Stage, ShyGuy
+        from player import Player
+        from camera import Camera
 
         players = ["mar", "yos", "pea", "lui"]
         vs_screen = VersusScreen(players)
-        stage = Stage()
+        canvas = pygame.Surface((800, 600))
+        stage0 = Stage(0, canvas)
+        stage1 = Stage(1, canvas)
+        stage2 = Stage(2, canvas)
 
+        player1 = Player(players[0], 1, False)
+        player2 = Player(players[0], 2, False)
         shyguy = ShyGuy()
+
+        camera1 = Camera(stage1, player1)
+        camera2 = Camera(stage2, player2)
+
+        correct_tiles_reset = False
 
         running = True
 
@@ -52,11 +64,31 @@ class Main:
                     sys.exit()
 
             # vs_screen.draw()
-            stage.get_correct_tiles(shyguy.my_path)
-            stage.draw_elements()
-            shyguy.update()
 
+            player1.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
+            camera1.draw()
 
+            player2.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
+            camera2.draw()
+
+            pygame.draw.line(SCREEN, (21, 21, 21), (400, 0), (400, 800), 5)
+            pygame.draw.line(SCREEN, (21, 21, 21), (0, 300), (800, 300), 5)
+
+            #
+            # # let shyguy walk across the generated path until he arrives tile 51
+            # if len(shyguy.my_path) < 1 or shyguy.my_path[-1] != 51:
+            #     stage0.draw_elements()
+            #     stage0.get_correct_tiles(shyguy.my_path)
+            #     shyguy.update()
+            # else:
+            #     # resets the display of correct path tiles on the stage and transfers the path to the player
+            #     if correct_tiles_reset != True:
+            #         stage0.correct_tiles = []
+            #         player1.correct_tile_path = shyguy.my_path
+            #         correct_tiles_reset = True
+            #     player1.update()
+            #     stage1.get_correct_tiles(player1.my_tile_path)
+            #     # stage0.get_correct_tiles(player1.my_tile_path)
 
             pygame.display.set_caption("Memory Lane 2D What-If-Demake | " + str(round(clock.get_fps())) + " FPS")
             pygame.display.update()

@@ -3,10 +3,21 @@ from main import pygame, SCREEN, random
 
 
 class Stage:
-    def __init__(self):
+    def __init__(self, pnum, canvas):
+        self.pnum = pnum # 0 for full-screen, 1 to 4 for the split-screens
+        self.canvas = canvas
+        if self.pnum == 1:
+            self.offset = pygame.math.Vector2(200, 300)
+            self.surf_area = pygame.Rect(0,0,400,300)
+            self.sub_canvas = self.canvas.subsurface(self.surf_area)
+        elif self.pnum == 2:
+            self.offset = pygame.math.Vector2(200, 300)
+            self.surf_area = pygame.Rect(400,0,400,300)
+            self.sub_canvas = self.canvas.subsurface(self.surf_area)
+        else:
+            self.offset = pygame.math.Vector2(0, 0)
         self.load_elements()
         self.correct_tiles = []
-        self.draw_elements()
 
     def load_elements(self):
         # load-sub-methods for loading graphic assets with xy-positions
@@ -214,34 +225,66 @@ class Stage:
 
     def draw_elements(self):
         def draw_bg():
-            SCREEN.blit(self.bg, self.bg_pos)
+            bg_offset = self.bg_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.bg, bg_offset)
+            else:
+                SCREEN.blit(self.bg, bg_offset)
 
         def draw_trails():
-            SCREEN.blit(self.trails, self.trails_pos)
+            trails_offset = self.trails_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.trails, trails_offset)
+            else:
+                SCREEN.blit(self.trails, trails_offset)
 
         def draw_neon_signs():
             # left signs
-            SCREEN.blit(self.bullet_bills[2 if random.randint(1, 100) <= 2 else 1], self.bullet_bills_pos)
+            bullet_bills_offset = self.bullet_bills_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.bullet_bills[2 if random.randint(1, 100) <= 2 else 1], bullet_bills_offset)
+            else:
+                SCREEN.blit(self.bullet_bills[2 if random.randint(1, 100) <= 2 else 1], bullet_bills_offset)
 
-            SCREEN.blit(self.vote_for_koopa[2 if random.randint(1, 100) <= 2 else 1], self.vote_for_koopa_pos)
+            vote_for_koopa_offset = self.vote_for_koopa_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.vote_for_koopa[2 if random.randint(1, 100) <= 2 else 1], vote_for_koopa_offset)
+            else:
+                SCREEN.blit(self.vote_for_koopa[2 if random.randint(1, 100) <= 2 else 1], vote_for_koopa_offset)
 
             # right signs
-            SCREEN.blit(self.fire_snake[2 if random.randint(1, 100) <= 2 else 1], self.fire_snake_pos)
+            fire_snake_offset = self.fire_snake_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.fire_snake[2 if random.randint(1, 100) <= 2 else 1], fire_snake_offset)
+            else:
+                SCREEN.blit(self.fire_snake[2 if random.randint(1, 100) <= 2 else 1], fire_snake_offset)
 
             if round(self.parts_frame + 0.05) > 2:
                 self.parts_frame = 1
             else: self.parts_frame += 0.05
-            SCREEN.blit(self.parts[round(self.parts_frame)], self.parts_pos)
+            parts_offset = self.parts_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.parts[round(self.parts_frame)], parts_offset)
+            else:
+                SCREEN.blit(self.parts[round(self.parts_frame)], parts_offset)
 
         def draw_chains():
             for i in range(5):
                 rotated_img_left = pygame.transform.rotate(self.chains_left[i], round(self.rotate_angles[i]))
                 rotated_rect_left = rotated_img_left.get_rect(center = self.chains_left[i].get_rect(topleft = self.chains_left_pos[i]).center)
-                SCREEN.blit(rotated_img_left, rotated_rect_left)
+                rotated_left_offset = rotated_rect_left.topleft - self.offset
+                if self.pnum != 0:
+                    self.sub_canvas.blit(rotated_img_left, rotated_left_offset)
+                else:
+                    SCREEN.blit(rotated_img_left, rotated_left_offset)
 
                 rotated_img_right = pygame.transform.rotate(self.chains_right[i], round(self.rotate_angles[i]))
                 rotated_rect_right = rotated_img_right.get_rect(center = self.chains_right[i].get_rect(topleft = self.chains_right_pos[i]).center)
-                SCREEN.blit(rotated_img_right, rotated_rect_right)
+                rotated_right_offset = rotated_rect_right.topleft - self.offset
+                if self.pnum != 0:
+                    self.sub_canvas.blit(rotated_img_right, rotated_right_offset)
+                else:
+                    SCREEN.blit(rotated_img_right, rotated_right_offset)
 
                 if self.rotate_angles[i] > 2:
                     self.swing = False
@@ -254,7 +297,11 @@ class Stage:
                     self.rotate_angles[i] -= 0.08
 
         def draw_tower():
-            SCREEN.blit(self.tower[2 if random.randint(1, 100) <= 3 else 1], self.tower_pos)
+            tower_offset = self.tower_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.tower[2 if random.randint(1, 100) <= 3 else 1], tower_offset)
+            else:
+                SCREEN.blit(self.tower[2 if random.randint(1, 100) <= 3 else 1], tower_offset)
 
         def draw_piranha_plants():
             # plant left
@@ -267,7 +314,11 @@ class Stage:
                     self.piranha_plant_left_frames_forwards = True
                 else: self.piranha_plant_frame_left -= 0.1
 
-            SCREEN.blit(self.piranha_plant_left[round(self.piranha_plant_frame_left)], self.piranha_plant_left_pos)
+            piranha_plant_left_offset = self.piranha_plant_left_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.piranha_plant_left[round(self.piranha_plant_frame_left)], piranha_plant_left_offset)
+            else:
+                SCREEN.blit(self.piranha_plant_left[round(self.piranha_plant_frame_left)], piranha_plant_left_offset)
 
             # plant right
             if self.piranha_plant_right_frames_forwards:
@@ -279,11 +330,19 @@ class Stage:
                     self.piranha_plant_right_frames_forwards = True
                 else: self.piranha_plant_frame_right -= 0.1
 
-            SCREEN.blit(self.piranha_plant_right[round(self.piranha_plant_frame_right)], self.piranha_plant_right_pos)
+            piranha_plant_right_offset = self.piranha_plant_right_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.piranha_plant_right[round(self.piranha_plant_frame_right)], piranha_plant_right_offset)
+            else:
+                SCREEN.blit(self.piranha_plant_right[round(self.piranha_plant_frame_right)], piranha_plant_right_offset)
 
         def draw_tiles():
 
-            SCREEN.blit(self.stepping_stone, self.stepping_stone_pos)
+            stepping_stone_offset = self.stepping_stone_pos - self.offset
+            if self.pnum != 0:
+                self.sub_canvas.blit(self.stepping_stone, stepping_stone_offset)
+            else:
+                SCREEN.blit(self.stepping_stone, stepping_stone_offset)
 
             if self.tiles_frames_forwards:
                 if round(self.tiles_frames_no + 0.06) > 3:
@@ -295,11 +354,22 @@ class Stage:
                 else: self.tiles_frames_no -= 0.06
 
             for no, tile in self.tiles_frames[round(self.tiles_frames_no)].items():
-                SCREEN.blit(tile, self.tiles_pos[no])
+                tile_offset = self.tiles_pos[no] - self.offset
+                if self.pnum != 0:
+                    self.sub_canvas.blit(tile, tile_offset)
+                else:
+                    SCREEN.blit(tile, tile_offset)
 
             if len(self.correct_tiles) > 0:
                 for tile in self.correct_tiles:
-                    SCREEN.blit(self.tiles_corr[tile], self.tiles_pos[tile])
+                    tile_offset = self.tiles_pos[tile] - self.offset
+                    if self.pnum != 0:
+                        self.sub_canvas.blit(self.tiles_corr[tile], tile_offset)
+                    else:
+                        SCREEN.blit(self.tiles_corr[tile], tile_offset)
+
+        if self.pnum != 0:
+            SCREEN.blit(self.sub_canvas, self.surf_area)
 
         draw_bg()
         draw_trails()
@@ -321,9 +391,10 @@ from tiles_field_borders import *
 class ShyGuy:
 
     def __init__(self):
-        self.sprites = self.load_sprites()
+        self.sprites = self.load_sprites("graphics/stage", "shy")
         self.x = 365
         self.y = 520
+        self.pos = (self.x, self.y)
         self.move_speed = 4
         self.animation_frame = 1
         self.animation_count_run = 0.25
@@ -344,7 +415,9 @@ class ShyGuy:
         self.load_rect()
         self.path = self.calculate_path()
         self.my_path = []
-        self.scaled = False
+        self.spawned = False
+        self.pnum = 0
+        self.offset = pygame.math.Vector2(0, 0)
 
     def load_rect(self):
         self.rect = pygame.rect.Rect((
@@ -353,7 +426,7 @@ class ShyGuy:
                 (self.sprites[self.current_dir][round(self.animation_frame)].get_width() / 3), # width
                 (self.sprites[self.current_dir][round(self.animation_frame)].get_height() / 5)) # height
 
-    def load_sprites(self) -> dict:
+    def load_sprites(self, file_direct:str, char:str) -> dict:
 
         run_left = {}
 
@@ -369,7 +442,7 @@ class ShyGuy:
 
         stand_up = {}
 
-        shy_sprites = {
+        sprites = {
             "run_left" : run_left,
             "run_right" : run_right,
             "run_up" : run_up,
@@ -380,10 +453,10 @@ class ShyGuy:
             "shadow" : pygame.image.load("graphics/shadow.png").convert_alpha()
         }
 
-        shy_sprites["shadow"].set_alpha(128)
+        sprites["shadow"].set_alpha(128)
 
         # dir for file directory
-        for dir in shy_sprites.keys():
+        for dir in sprites.keys():
             if not dir.startswith("shadow"):
                 if dir.startswith("run_"):
                     j = 4
@@ -391,10 +464,19 @@ class ShyGuy:
                     j = 2
 
                 for i in range(j):
-                    img = pygame.image.load(f"graphics/stage/shy/{dir}/shy_{dir}_f{i+1}.png").convert_alpha()
-                    shy_sprites[dir][i+1] = img
+                    img = pygame.image.load(f"{file_direct}/{char}/{dir}/{char}_{dir}_f{i+1}.png").convert_alpha()
+                    sprites[dir][i+1] = img
 
-        return shy_sprites
+        return sprites
+
+    def get_current_sprites(self) -> dict:
+
+        size_diff = round((self.current_row - 1) * 1.2, 1)
+        copy_sprites_dict = self.sprites[self.current_dir].copy()
+        for frame, sprite in self.sprites[self.current_dir].items():
+            copy_sprites_dict[frame] = pygame.transform.scale(sprite, (68 - size_diff, 75 - size_diff))
+        copy_sprites_dict['shadow'] = pygame.transform.scale(self.sprites['shadow'], (68 - size_diff, 25 - size_diff))
+        return copy_sprites_dict
 
     def animation(self):
         if self.current_dir.startswith("run_"):
@@ -411,36 +493,27 @@ class ShyGuy:
                 self.animation_frame = 1
             else: self.animation_frame += self.animation_count_stand
 
-    def draw_sprites(self):
-
+    def draw(self):
         self.animation()
 
+        if self.spawned != True:
+            self.current_sprites = self.get_current_sprites()
+
+        offset = [0, 0]
+        if self.pnum == 1:
+            offset = self.pos - self.offset
+        elif self.pnum == 2:
+            offset[0] = self.pos[0] + self.offset[0] # x
+            offset[1] = self.pos[1] - self.offset[1] # y
+
         # draw shadow
-        SCREEN.blit(self.sprites["shadow"], (self.rect.left - (self.sprites[self.current_dir][round(self.animation_frame)].get_width() / 4),
-                                             self.rect.top + (self.sprites[self.current_dir][round(self.animation_frame)].get_height() / 12)))
+        SCREEN.blit(self.current_sprites["shadow"], (offset[0],
+                                                     offset[1]+ (self.current_sprites[round(self.animation_frame)].get_height() // 1.2)))
 
-        # scale
-        if self.scaled != True:
-            self.scaled = True
+        # draw current sprite(s)
+        SCREEN.blit(self.current_sprites[round(self.animation_frame)], offset)
 
-            # run sprites
-            runs = ["run_left", "run_right", "run_up"]
-            for i in range(4):
-                for run in runs:
-                    self.sprites[run][i+1] = pygame.transform.scale(self.sprites[run][i+1], (self.sprites[run][i+1].get_width() - 1.2, self.sprites[run][i+1].get_height() - 1.2))
-
-            # stand sprites
-            stands = ["stand_left", "stand_right", "stand_up", "stand_down"]
-            for i in range(2):
-                for stand in stands:
-                    self.sprites[stand][i + 1] = pygame.transform.scale(self.sprites[stand][i + 1], (self.sprites[stand][i + 1].get_width() - 1.2, self.sprites[stand][i + 1].get_height() - 1.2))
-
-            self.sprites["shadow"] = pygame.transform.smoothscale(self.sprites["shadow"], (self.sprites["shadow"].get_width() - 2, self.sprites["shadow"].get_height() - 2))
-
-        # draw current shyguy sprite
-        SCREEN.blit(self.sprites[self.current_dir][round(self.animation_frame)], (self.x, self.y))
-
-        # pygame.draw.rect(SCREEN, (000, 000, 000), self.rect)
+        pygame.draw.rect(SCREEN, (000, 000, 000), self.rect)
 
     def calculate_path(self) -> dict:
 
@@ -480,42 +553,34 @@ class ShyGuy:
         if self.rect.bottom < (borders[8]["upper"] - (calc_diff_vertically(8, 9) / 2)) and self.row_8_to_9 != True:
             switch_tile()
             self.current_row = 9
-            self.scaled = False
             self.row_8_to_9 = True
         elif self.rect.bottom < (borders[7]["upper"] - (calc_diff_vertically(7, 8) / 3)) and self.row_7_to_8 != True:
             switch_tile()
             self.current_row = 8
-            self.scaled = False
             self.row_7_to_8 = True
         elif self.rect.bottom < (borders[6]["upper"] - (calc_diff_vertically(6, 7) / 4)) and self.row_6_to_7 != True:
             switch_tile()
             self.current_row = 7
-            self.scaled = False
             self.row_6_to_7 = True
         elif self.rect.bottom < (borders[5]["upper"] - (calc_diff_vertically(5, 6) / 4)) and self.row_5_to_6 != True:
             switch_tile()
             self.current_row = 6
-            self.scaled = False
             self.row_5_to_6 = True
         elif self.rect.bottom < (borders[4]["upper"] - (calc_diff_vertically(4, 5) / 4)) and self.row_4_to_5 != True:
             switch_tile()
             self.current_row = 5
-            self.scaled = False
             self.row_4_to_5 = True
         elif self.rect.bottom < (borders[3]["upper"] - (calc_diff_vertically(3, 4) / 4)) and self.row_3_to_4 != True:
             switch_tile()
             self.current_row = 4
-            self.scaled = False
             self.row_3_to_4 = True
         elif self.rect.bottom < (borders[2]["upper"] - (calc_diff_vertically(2, 3) / 4)) and self.row_2_to_3 != True:
             switch_tile()
             self.current_row = 3
-            self.scaled = False
             self.row_2_to_3 = True
         elif self.rect.bottom < (borders[1]["upper"] - (calc_diff_vertically(1, 2) / 4)) and self.row_1_to_2 != True:
             switch_tile()
             self.current_row = 2
-            self.scaled = False
             self.row_1_to_2 = True
 
     def check_current_column(self):
@@ -606,12 +671,12 @@ class ShyGuy:
             self.y -= self.move_speed
 
             match column:
-                case 1: self.x += 0.8 if self.current_row < 6 else 0.7
-                case 2: self.x += 0.7 if self.current_row < 6 else 0.6
-                case 3: self.x += 0.6 if self.current_row < 6 else 0.5
-                case 5: self.x -= 0.6 if self.current_row < 6 else 0.5
-                case 6: self.x -= 0.7 if self.current_row < 6 else 0.6
-                case 7: self.x -= 0.8 if self.current_row < 6 else 0.7
+                case 1: self.x += 0.7 if self.current_row < 6 else 0.6
+                case 2: self.x += 0.6 if self.current_row < 6 else 0.5
+                case 3: self.x += 0.5 if self.current_row < 6 else 0.4
+                case 5: self.x -= 0.5 if self.current_row < 6 else 0.4
+                case 6: self.x -= 0.6 if self.current_row < 6 else 0.5
+                case 7: self.x -= 0.7 if self.current_row < 6 else 0.6
 
         def move_right():
             self.current_dir = "run_right"
@@ -644,9 +709,11 @@ class ShyGuy:
                         else:
                             move_left()
 
+        self.pos = (self.x, self.y)
+
     def update(self):
         self.load_rect()
         self.move()
         self.record_my_path(self.current_tile)
-        self.draw_sprites()
+        self.draw()
 

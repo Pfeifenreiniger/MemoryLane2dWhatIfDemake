@@ -8,11 +8,19 @@ class Stage:
         self.canvas = canvas
         if self.pnum == 1:
             self.offset = pygame.math.Vector2(200, 300)
-            self.surf_area = pygame.Rect(0,0,400,300)
+            self.surf_area = pygame.Rect(0, 0, 400, 300)
             self.sub_canvas = self.canvas.subsurface(self.surf_area)
         elif self.pnum == 2:
             self.offset = pygame.math.Vector2(200, 300)
-            self.surf_area = pygame.Rect(400,0,400,300)
+            self.surf_area = pygame.Rect(400, 0, 400, 300)
+            self.sub_canvas = self.canvas.subsurface(self.surf_area)
+        elif self.pnum == 3:
+            self.offset = pygame.math.Vector2(200, 0)
+            self.surf_area = pygame.Rect(0, 300, 400, 300)
+            self.sub_canvas = self.canvas.subsurface(self.surf_area)
+        elif self.pnum == 4:
+            self.offset = pygame.math.Vector2(200, 0)
+            self.surf_area = pygame.Rect(400,300,400,300)
             self.sub_canvas = self.canvas.subsurface(self.surf_area)
         else:
             self.offset = pygame.math.Vector2(0, 0)
@@ -393,7 +401,11 @@ class ShyGuy:
     def __init__(self):
         self.sprites = self.load_sprites("graphics/stage", "shy")
         self.x = 365
+        self.x_start = self.x
+        self.x_diff = 0
         self.y = 520
+        self.y_start = self.y
+        self.y_diff = 0
         self.pos = (self.x, self.y)
         self.move_speed = 4
         self.animation_frame = 1
@@ -500,11 +512,37 @@ class ShyGuy:
             self.current_sprites = self.get_current_sprites()
 
         offset = [0, 0]
-        if self.pnum == 1:
-            offset = self.pos - self.offset
-        elif self.pnum == 2:
-            offset[0] = self.pos[0] + self.offset[0] # x
-            offset[1] = self.pos[1] - self.offset[1] # y
+        if self.pnum != 0:
+
+            self.x_diff = abs(self.x - self.x_start)
+            self.y_diff = abs(self.y - self.y_start)
+
+            if self.pnum == 1:
+                # offset = self.pos - self.offset
+                if self.x > self.x_start:
+                    offset[0] = (self.pos[0] - self.offset.x) - self.x_diff
+                else:
+                    offset[0] = (self.pos[0] - self.offset.x) + self.x_diff # x
+                offset[1] = (self.pos[1] - self.offset.y) + self.y_diff  # y
+            elif self.pnum == 2:
+                if self.x > self.x_start:
+                    offset[0] = (self.pos[0] + self.offset.x) - self.x_diff
+                else:
+                    offset[0] = (self.pos[0] + self.offset.x) + self.x_diff # x
+                offset[1] = (self.pos[1] - self.offset.y) + self.y_diff  # y
+            elif self.pnum == 3:
+                if self.x > self.x_start:
+                    offset[0] = (self.pos[0] - self.offset.x) - self.x_diff
+                else:
+                    offset[0] = (self.pos[0] - self.offset.x) + self.x_diff # x
+                offset[1] = (self.pos[1] + self.offset.y) + self.y_diff  # y
+            elif self.pnum == 4:
+                if self.x > self.x_start:
+                    offset[0] = (self.pos[0] + self.offset.x) - self.x_diff
+                else:
+                    offset[0] = (self.pos[0] + self.offset.x) + self.x_diff # x
+                offset[1] = (self.pos[1] + self.offset.y) + self.y_diff  # y
+
 
         # draw shadow
         SCREEN.blit(self.current_sprites["shadow"], (offset[0],

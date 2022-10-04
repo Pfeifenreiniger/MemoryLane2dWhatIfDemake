@@ -43,13 +43,19 @@ class Main:
         stage0 = Stage(0, canvas)
         stage1 = Stage(1, canvas)
         stage2 = Stage(2, canvas)
+        stage3 = Stage(3, canvas)
+        stage4 = Stage(4, canvas)
 
         player1 = Player(players[0], 1, False)
         player2 = Player(players[0], 2, False)
+        player3 = Player(players[0], 3, False)
+        player4 = Player(players[0], 4, False)
         shyguy = ShyGuy()
 
         camera1 = Camera(stage1, player1)
         camera2 = Camera(stage2, player2)
+        camera3 = Camera(stage3, player3)
+        camera4 = Camera(stage4, player4)
 
         correct_tiles_reset = False
 
@@ -70,6 +76,12 @@ class Main:
 
             player2.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
             camera2.draw()
+
+            player3.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
+            camera3.draw()
+
+            player4.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
+            camera4.draw()
 
             pygame.draw.line(SCREEN, (21, 21, 21), (400, 0), (400, 800), 5)
             pygame.draw.line(SCREEN, (21, 21, 21), (0, 300), (800, 300), 5)

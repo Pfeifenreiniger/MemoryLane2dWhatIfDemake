@@ -12,7 +12,11 @@ class Player(ShyGuy):
         self.sprites = self.load_sprites("graphics/player", char)
         self.pnum = pnum
         self.x = 365
+        self.x_start = self.x
+        self.x_diff = 0
         self.y = 520
+        self.y_start = self.y
+        self.y_diff = 0
         self.pos = (self.x, self.y)
         self.current_row = 1
         self.current_column = 4
@@ -30,6 +34,10 @@ class Player(ShyGuy):
         self.arrived = False # sobald arrived=True ist der Spieler am Ziel angekommen, wird bei movement() umgestellt
         self.spawned = False
         self.offset = pygame.math.Vector2(0, 0)
+        if self.pnum == 1 or self.pnum == 2:
+            self.offset = pygame.math.Vector2(200, 300)
+        elif self.pnum == 3 or self.pnum == 4:
+            self.offset = pygame.math.Vector2(200, 0)
 
     def track_tile_path(self):
         if self.current_tile not in self.my_tile_path:
@@ -70,7 +78,7 @@ class Player(ShyGuy):
                     # D -> RIGHT
                     elif self.keys[pygame.K_d]:
                         run_right()
-            # player 1: i j k
+            # player 2: i j k
             elif self.pnum == 2:
                 if self.key_pressed != True:
                     # I -> UP
@@ -81,6 +89,30 @@ class Player(ShyGuy):
                         run_left()
                     # K -> RIGHT
                     elif self.keys[pygame.K_k]:
+                        run_right()
+            # player 3: arrow keys
+            elif self.pnum == 3:
+                if self.key_pressed != True:
+                    # ARROW UP -> UP
+                    if self.keys[pygame.K_UP]:
+                        run_up()
+                    # ARROW LEFT -> LEFT
+                    elif self.keys[pygame.K_LEFT]:
+                        run_left()
+                    # ARROW RIGHT -> RIGHT
+                    elif self.keys[pygame.K_RIGHT]:
+                        run_right()
+            # player 4: num pad 8 4 6
+            elif self.pnum == 4:
+                if self.key_pressed != True:
+                    # 8 -> UP
+                    if self.keys[pygame.K_KP8]:
+                        run_up()
+                    # 4 -> LEFT
+                    elif self.keys[pygame.K_KP4]:
+                        run_left()
+                    # 6 -> RIGHT
+                    elif self.keys[pygame.K_KP6]:
                         run_right()
 
     def movement(self):

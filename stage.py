@@ -31,7 +31,7 @@ class Stage:
         # load-sub-methods for loading graphic assets with xy-positions
         def load_bg():
             self.bg = pygame.image.load("graphics/stage/bg/background.png").convert_alpha()
-            self.bg_pos = (0, 0)
+            self.bg_pos = (-100, -100)
 
         def load_chains():
             # left chains
@@ -42,7 +42,7 @@ class Stage:
                     pygame.image.load(f"graphics/stage/chains/left/chainsL0{i + 1}.png").convert_alpha())
 
             # xy-positions
-            self.chains_left_pos = [[-14, -8], [-17, 217], [-29, 346], [174, -5], [85, -13]]
+            self.chains_left_pos = [[-120, -78], [-105, 217], [-85, 346], [154, -85], [65, -82]]
 
             # right chains
             # graphics
@@ -52,7 +52,7 @@ class Stage:
                     pygame.image.load(f"graphics/stage/chains/right/chainsR0{i + 1}.png").convert_alpha())
 
             # xy-positions
-            self.chains_right_pos = [[583, -5], [636, 220], [691, 348], [502, -2], [530, -10]]
+            self.chains_right_pos = [[650, -100], [760, 220], [755, 348], [550, -178], [580, -130]]
 
             self.rotate_angles = []
             for i in range(5):
@@ -111,7 +111,10 @@ class Stage:
                 self.piranha_plant_left.update({i + 1: pygame.image.load(
                     f"graphics/stage/piranha_plants/left/piranha_plant_left_f{i + 1}.png").convert_alpha()})
 
-            self.piranha_plant_left_pos = (32, -18)
+            if self.pnum != 0:
+                self.piranha_plant_left_pos = (32, -118)
+            else:
+                self.piranha_plant_left_pos = (32, -18)
 
             # right plant
 
@@ -123,7 +126,10 @@ class Stage:
                 self.piranha_plant_right.update({i + 1: pygame.image.load(
                     f"graphics/stage/piranha_plants/right/piranha_plant_right_f{i + 1}.png").convert_alpha()})
 
-            self.piranha_plant_right_pos = (577, -44)
+            if self.pnum != 0:
+                self.piranha_plant_right_pos = (577, -144)
+            else:
+                self.piranha_plant_right_pos = (577, -44)
 
         def load_tiles():
             # key = tile no : value = image
@@ -215,7 +221,7 @@ class Stage:
                 2: pygame.image.load("graphics/stage/tower/tower_f2.png").convert_alpha()
             }
 
-            self.tower_pos = (189, -9)
+            self.tower_pos = (100, -307)
 
         def load_trails():
             self.trails = pygame.image.load("graphics/stage/trails/trails.png").convert_alpha()
@@ -542,7 +548,8 @@ class ShyGuy:
                 else:
                     offset[0] = (self.pos[0] + self.offset.x) + self.x_diff # x
                 offset[1] = (self.pos[1] + self.offset.y) + self.y_diff  # y
-
+        else:
+            offset = self.pos
 
         # draw shadow
         SCREEN.blit(self.current_sprites["shadow"], (offset[0],
@@ -551,7 +558,7 @@ class ShyGuy:
         # draw current sprite(s)
         SCREEN.blit(self.current_sprites[round(self.animation_frame)], offset)
 
-        pygame.draw.rect(SCREEN, (000, 000, 000), self.rect)
+        # pygame.draw.rect(SCREEN, (000, 000, 000), self.rect)
 
     def calculate_path(self) -> dict:
 

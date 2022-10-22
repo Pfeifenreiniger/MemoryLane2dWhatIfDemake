@@ -1,4 +1,5 @@
 
-liste = [1, 6, 8, 90]
+import time
 
-print(liste[-1])
+print(round(time.time()))
+print(round(time.time() + 10))

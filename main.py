@@ -54,9 +54,9 @@ class Main:
         stage_objects = [stage1, stage2, stage3, stage4]
 
         player1 = Player(players[0], 1, False)
-        player2 = Player(players[0], 2, False)
+        player2 = Player(players[3], 2, False)
         player3 = Player(players[0], 3, False)
-        player4 = Player(players[0], 4, False)
+        player4 = Player(players[3], 4, False)
         player_objects = [player1, player2, player3, player4]
         shyguy = ShyGuy()
 
@@ -77,49 +77,36 @@ class Main:
                     pygame.quit()
                     sys.exit()
 
-            # vs_screen.draw()
-
-            # player1.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
-
-
-            # player2.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
-
-
-            # player3.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
-
-
-            # player4.correct_tile_path = [1, 5, 12, 19, 26, 33, 40, 47, 51]
-
-
-
-
-            # let shyguy walk across the generated path until he arrives tile 51
-            if len(shyguy.my_path) < 1 or shyguy.my_path[-1] != 51:
-                stage0.draw_elements()
-                stage0.get_correct_tiles(shyguy.my_path)
-                shyguy.update()
+            if vs_screen.screen_done != True:
+                vs_screen.update()
             else:
-                # resets the display of correct path tiles on the stage and transfers the path to the player
-                if correct_tiles_reset != True:
-                    stage0.correct_tiles = []
+                # let shyguy walk across the generated path until he arrives tile 51
+                if len(shyguy.my_path) < 1 or shyguy.my_path[-1] != 51:
+                    stage0.draw_elements()
+                    stage0.get_correct_tiles(shyguy.my_path)
+                    shyguy.update()
+                else:
+                    # resets the display of correct path tiles on the stage and transfers the path to the player
+                    if correct_tiles_reset != True:
+                        stage0.correct_tiles = []
 
-                    for p in player_objects:
-                        p.correct_tile_path = shyguy.my_path
+                        for p in player_objects:
+                            p.correct_tile_path = shyguy.my_path
 
-                    correct_tiles_reset = True
+                        correct_tiles_reset = True
 
-                camera1.draw()
-                camera2.draw()
-                camera3.draw()
-                camera4.draw()
+                    camera1.draw()
+                    camera2.draw()
+                    camera3.draw()
+                    camera4.draw()
 
-                counter = 0
-                for s in stage_objects:
-                    s.get_correct_tiles(player_objects[counter].my_tile_path)
-                    counter += 1
+                    counter = 0
+                    for s in stage_objects:
+                        s.get_correct_tiles(player_objects[counter].my_tile_path)
+                        counter += 1
 
-                Main.draw_4_way_split_screen_lines()
-                # stage0.get_correct_tiles(player1.my_tile_path)
+                    Main.draw_4_way_split_screen_lines()
+                    # stage0.get_correct_tiles(player1.my_tile_path)
 
             pygame.display.set_caption("Memory Lane 2D What-If-Demake | " + str(round(clock.get_fps())) + " FPS")
             pygame.display.update()

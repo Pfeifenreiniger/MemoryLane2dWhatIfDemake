@@ -1,4 +1,6 @@
 
+import time
+
 from main import pygame, SCREEN
 
 from fonts import FONT_MASHEEN_30, FONT_MASHEEN_BOLD_40
@@ -13,6 +15,15 @@ class VersusScreen:
         self.load_player_graphics()
         self.sparks_position = [-2327, -503]
         self.sparks_move_speed = 6
+        self.timestamp = self.stamp_time()
+        self.screen_done = False
+
+    def stamp_time(self):
+        return round(time.time())
+
+    def check_time_duration(self):
+        if round(time.time()) >= self.timestamp + 15:
+            self.screen_done = True
 
     def load_bg_graphic(self):
         self.bg = pygame.image.load("graphics/versus_screen/vsScreen_blackBg.png").convert_alpha()
@@ -97,6 +108,10 @@ class VersusScreen:
         for x in x_vs_text:
             vs_text_surface_rect = vs_text_surface.get_rect(center=(x, Y))
             SCREEN.blit(vs_text_surface, vs_text_surface_rect)
+
+    def update(self):
+        self.draw()
+        self.check_time_duration()
 
 class Spark(pygame.sprite.Sprite):
     def __init__(self, no_in_row, direct, row_no):

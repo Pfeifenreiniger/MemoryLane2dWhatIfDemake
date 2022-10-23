@@ -55,7 +55,7 @@ class Main:
 
         player1 = Player(players[0], 1, False)
         player2 = Player(players[3], 2, False)
-        player3 = Player(players[0], 3, False)
+        player3 = Player(players[2], 3, False)
         player4 = Player(players[3], 4, False)
         player_objects = [player1, player2, player3, player4]
         shyguy = ShyGuy()

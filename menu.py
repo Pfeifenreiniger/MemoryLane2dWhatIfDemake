@@ -4,7 +4,8 @@ from fonts import FONT_PRESS_START_30
 
 
 class PressSpace:
-    def __init__(self):
+    def __init__(self, menu_numb_of_players):
+        self.menu_numb_of_players = menu_numb_of_players
         self.key_pressed = False
         self.font = FONT_PRESS_START_30
         self.left_gate_pos = pygame.math.Vector2(x=0, y=0)
@@ -78,7 +79,10 @@ class PressSpace:
 
 
     def draw(self):
-        SCREEN.fill("black")
+
+        if self.start_gate_animation:
+            self.menu_numb_of_players.update()
+
         # left gate
         SCREEN.blit(self.left_gate, self.left_gate_rect)
         # right gate
@@ -102,7 +106,93 @@ class PressSpace:
         self.font_animation()
 
         if self.check_if_done():
-            self.__init__()
+            self.__init__(self.menu_numb_of_players)
             self.screen_done = True
 
 
+class NumbOfPlayers:
+    def __init__(self):
+        self.load_graphics()
+        self.key_pressed = False
+        self.menu_pane_pos = pygame.math.Vector2(75, 300)
+        self.MENU_PANE_START_HEIGHT = 2
+        self.MENU_PANE_END_HEIGHT = 350
+        self.menu_pane_height = self.MENU_PANE_START_HEIGHT
+        self.start_menu_pane_animation = False
+        self.menu_pane_direct = "on"
+        self.screen_done = False
+
+    def load_graphics(self):
+        self.bg = pygame.image.load("graphics/menu/numb_of_players/bg.png")
+        self.chains = []
+        for i in range(7):
+            self.chains.append(pygame.image.load("graphics/menu/numb_of_players/chain.png").convert_alpha())
+        # chains xy-pos
+        self.chains_pos = [
+            pygame.math.Vector2(64, -10),
+            pygame.math.Vector2(159, -10),
+            pygame.math.Vector2(272, -10),
+            pygame.math.Vector2(405, -10),
+            pygame.math.Vector2(535, -10),
+            pygame.math.Vector2(659, -10),
+            pygame.math.Vector2(762, -10)
+        ]
+
+        self.rotate_angles = []
+        for i in range(7):
+            self.rotate_angles.append(random.randint(-2, 2))
+        self.swing = True
+
+    def event_listen(self):
+        if self.key_pressed != True:
+            self.keys = pygame.key.get_pressed()
+            if self.keys[pygame.K_RETURN]:
+                self.menu_pane_direct = "off"
+                self.key_pressed = True
+
+    def load_menu_pane_rect(self):
+        self.menu_pane_rect = pygame.Rect(self.menu_pane_pos.x, self.menu_pane_pos.y, 650, self.menu_pane_height)
+        self.menu_pane_surf = pygame.Surface((650, self.menu_pane_height))
+        self.menu_pane_surf.fill((100, 54, 135))
+        self.menu_pane_surf.set_alpha(180)
+
+    def animate_menu_pane(self, direct):
+        if direct == "on":
+            if self.menu_pane_height + 30 <= self.MENU_PANE_END_HEIGHT:
+                self.menu_pane_height += 30
+                self.menu_pane_pos.y -= 15
+        else:
+            if self.menu_pane_height - 30 >= self.MENU_PANE_START_HEIGHT:
+                self.menu_pane_height -= 30
+                self.menu_pane_pos.y += 15
+
+    def draw(self):
+        # bg
+        SCREEN.blit(self.bg, (0, 0))
+
+        # chains
+        for i in range(7):
+            rotated_chain = pygame.transform.rotate(self.chains[i], round(self.rotate_angles[i]))
+            rotated_chain_rect = rotated_chain.get_rect(center=self.chains[i].get_rect(topleft=self.chains_pos[i]).center)
+            SCREEN.blit(rotated_chain, rotated_chain_rect)
+
+            if self.rotate_angles[i] > 2:
+                self.swing = False
+            elif self.rotate_angles[i] < -2:
+                self.swing = True
+
+            if self.swing:
+                self.rotate_angles[i] += 0.08
+            else:
+                self.rotate_angles[i] -= 0.08
+
+        # menu pane
+        if self.start_menu_pane_animation:
+            self.load_menu_pane_rect()
+            self.animate_menu_pane(self.menu_pane_direct)
+            SCREEN.blit(self.menu_pane_surf, self.menu_pane_rect)
+            # pygame.draw.rect(SCREEN, (100, 54, 135), self.menu_pane_rect)
+
+    def update(self):
+        self.event_listen()
+        self.draw()

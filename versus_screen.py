@@ -1,5 +1,4 @@
 
-import time
 
 from main import pygame, SCREEN
 
@@ -15,14 +14,13 @@ class VersusScreen:
         self.load_player_graphics()
         self.sparks_position = [-2327, -503]
         self.sparks_move_speed = 6
-        self.timestamp = self.stamp_time()
+        self.screen_counter = 0
         self.screen_done = False
 
-    def stamp_time(self):
-        return round(time.time())
+    def check_if_screen_done(self):
+        self.screen_counter += 0.1
 
-    def check_time_duration(self):
-        if round(time.time()) >= self.timestamp + 15:
+        if self.screen_counter > 35:
             self.screen_done = True
 
     def load_bg_graphic(self):
@@ -111,7 +109,7 @@ class VersusScreen:
 
     def update(self):
         self.draw()
-        self.check_time_duration()
+        self.check_if_screen_done()
 
 class Spark(pygame.sprite.Sprite):
     def __init__(self, no_in_row, direct, row_no):

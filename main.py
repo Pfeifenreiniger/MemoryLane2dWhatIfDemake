@@ -40,7 +40,7 @@ class Main:
     @staticmethod
     def run_game():
 
-        from menu import PressSpace, NumbOfPlayers
+        from menu import PressSpace, MenuScreen
 
         from versus_screen import VersusScreen
         from stage import Stage, ShyGuy
@@ -48,8 +48,8 @@ class Main:
         from camera import Camera
 
         #----loading objects----#
-        menu_numb_of_players = NumbOfPlayers()
-        menu_press_space = PressSpace(menu_numb_of_players)
+        menu_screen = MenuScreen()
+        menu_press_space = PressSpace(menu_screen)
 
         players = ["mar", "yos", "pea", "lui"]
         vs_screen = VersusScreen(players)
@@ -88,10 +88,11 @@ class Main:
             if menu_press_space.screen_done != True:
                 menu_press_space.update()
             else:
-                menu_numb_of_players = menu_press_space.menu_numb_of_players
-                menu_numb_of_players.start_menu_pane_animation = True
-                if menu_numb_of_players.screen_done != True:
-                    menu_numb_of_players.update()
+                # menu screens:  numb_of_players > player select > controls
+                menu_screen = menu_press_space.menu_screen
+                menu_screen.start_menu_pane_animation = True
+                if menu_screen.screen_done != True:
+                    menu_screen.update()
                 else:
                     if vs_screen.screen_done != True:
                         vs_screen.update()

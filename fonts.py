@@ -8,6 +8,7 @@ FONT_MASHEEN_30 = pygame.font.Font("fonts/masheen/masheen.ttf", 30)
 FONT_MASHEEN_BOLD_40 = pygame.font.Font("fonts/masheen/masheen_bold.ttf", 40)
 
 # press start
+FONT_PRESS_START_20 = pygame.font.Font("fonts/PressStart2P-vaV7.ttf", 20)
 FONT_PRESS_START_30 = pygame.font.Font("fonts/PressStart2P-vaV7.ttf", 30)
 
 

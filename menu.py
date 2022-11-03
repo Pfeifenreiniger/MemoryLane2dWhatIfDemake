@@ -128,8 +128,11 @@ class MenuScreen:
         self.show_buttons = False
         self.menu_pane_direct = "on"
         self.numb_of_players = 1
+        self.current_player = "mar"
         self.players = []
+        self.last_player_selection_timestamp = 0
         self.screen_done = False
+        self.restart_game = False
 
     def load_graphics(self):
         # bg image
@@ -170,6 +173,18 @@ class MenuScreen:
                 case "pea": self.player_select_pos[player] = pygame.math.Vector2(x=147, y=331)
                 case "yos": self.player_select_pos[player] = pygame.math.Vector2(x=453, y=331)
 
+        # player controls
+        self.player_controls_images = {}
+        self.player_controls_pos = {}
+        for i in range(1, 5):
+            self.player_controls_images[i] = pygame.image.load(f"graphics/menu/controls/controls_p{i}.png").convert_alpha()
+
+            match i:
+                case 1: self.player_controls_pos[i] = pygame.math.Vector2(x=80, y=185)
+                case 2: self.player_controls_pos[i] = pygame.math.Vector2(x=242, y=245)
+                case 3: self.player_controls_pos[i] = pygame.math.Vector2(x=403, y=185)
+                case 4: self.player_controls_pos[i] = pygame.math.Vector2(x=565, y=245)
+
         # menu fonts
         # numb_of_players
         font_surf_1p = self.font.render("1 PLAYER", False, self.FONT_COLOR_WHITE)
@@ -180,14 +195,47 @@ class MenuScreen:
         font_rect_2p = font_surf_2p.get_rect(center=(400, 251))
         font_rect_3p = font_surf_3p.get_rect(center=(400, 338))
         font_rect_4p = font_surf_4p.get_rect(center=(400, 425))
+
+        # player_select
+        font_surf_p1 = self.font.render("P1", False, self.FONT_COLOR_WHITE)
+        font_surf_p2 = self.font.render("P2", False, self.FONT_COLOR_WHITE)
+        font_surf_p3 = self.font.render("P3", False, self.FONT_COLOR_WHITE)
+        font_surf_p4 = self.font.render("P4", False, self.FONT_COLOR_WHITE)
+
         self.fonts = {
             "numb_of_players" : {
                 1 : [font_surf_1p, font_rect_1p],
                 2 : [font_surf_2p, font_rect_2p],
                 3 : [font_surf_3p, font_rect_3p],
                 4 : [font_surf_4p, font_rect_4p]
+            },
+            "player_select" : {
+                1 : [font_surf_p1],
+                2 : [font_surf_p2],
+                3 : [font_surf_p3],
+                4 : [font_surf_p4]
             }
         }
+
+    def load_player_positions(self, player_end_positions:list):
+
+        self.player_pos_fonts = {
+            1 : [],
+            2 : [],
+            3 : [],
+            4 : []
+        }
+
+        for pos in range(len(player_end_positions)):
+
+            match pos:
+                case 0: coord = (400, 164); pos_text = "1st: "
+                case 1: coord = (400, 251); pos_text = "2nd: "
+                case 2: coord = (400, 338); pos_text = "3rd: "
+                case 3: coord = (400, 425); pos_text = "4th: "
+
+            self.player_pos_fonts[pos + 1].append(self.font.render(f"{pos_text}P{player_end_positions[pos]}", False, self.FONT_COLOR_WHITE))
+            self.player_pos_fonts[pos+1].append(self.player_pos_fonts[pos+1][0].get_rect(center=coord))
 
     def event_listen(self):
 
@@ -199,23 +247,67 @@ class MenuScreen:
             self.keys = pygame.key.get_pressed()
 
             if self.keys[pygame.K_RETURN]:
-                self.menu_pane_direct = "off"
                 if self.current_screen == "numb_of_players":
                     self.current_screen = "player_select"
+                    self.menu_pane_direct = "off"
+                elif self.current_screen == "player_select" and len(self.players) < 4:
+                    if len(self.players) < 3:
+                        self.players.append(self.current_player)
+                    else:
+                        self.players.append(self.current_player)
+                        self.last_player_selection_timestamp = time.time()
+                        self.menu_pane_direct = "off"
+                    x_offset = 5
+                    if self.players.count(self.current_player) > 1:
+                        x_offset += (self.players.count(self.current_player) * 50) - 50
+                    pnum_pos = (self.player_select_pos[self.current_player].x + x_offset, self.player_select_pos[self.current_player].y + 5)
+                    if len(self.fonts["player_select"][len(self.players)]) > 1:
+                        self.fonts["player_select"][len(self.players)].pop()
+                    self.fonts["player_select"][len(self.players)].append(self.fonts["player_select"][len(self.players)][0].get_rect(topleft=pnum_pos))
+                elif self.current_screen == "controls":
+                    self.menu_pane_direct = "off"
+                elif self.current_screen == "positions":
+                    self.menu_pane_direct = "off"
                 stamp_time_key_press()
+            if self.keys[pygame.K_ESCAPE]:
+                self.players.clear()
             elif self.keys[pygame.K_UP]:
                 if self.current_screen == "numb_of_players":
                     if self.numb_of_players > 1:
                         self.numb_of_players -= 1
-                        stamp_time_key_press()
+                elif self.current_screen == "player_select":
+                    if self.current_player == "pea":
+                        self.current_player = "mar"
+                    elif self.current_player == "yos":
+                        self.current_player = "lui"
+                stamp_time_key_press()
             elif self.keys[pygame.K_DOWN]:
                 if self.current_screen == "numb_of_players":
                     if self.numb_of_players < 4:
                         self.numb_of_players += 1
-                        stamp_time_key_press()
+                elif self.current_screen == "player_select":
+                    if self.current_player == "mar":
+                        self.current_player = "pea"
+                    elif self.current_player == "lui":
+                        self.current_player = "yos"
+                stamp_time_key_press()
+            elif self.keys[pygame.K_RIGHT]:
+                if self.current_screen == "player_select":
+                    if self.current_player == "mar":
+                        self.current_player = "lui"
+                    elif self.current_player == "pea":
+                        self.current_player = "yos"
+                stamp_time_key_press()
+            elif self.keys[pygame.K_LEFT]:
+                if self.current_screen == "player_select":
+                    if self.current_player == "lui":
+                        self.current_player = "mar"
+                    elif self.current_player == "yos":
+                        self.current_player = "pea"
+                stamp_time_key_press()
 
         else:
-            if round(time.time(), 1) > round(self.key_pressed_timestamp, 1):
+            if round(time.time(), 1) > round(self.key_pressed_timestamp, 1)+0.2:
                 self.key_pressed = False
 
     def load_menu_pane_rect(self):
@@ -231,15 +323,21 @@ class MenuScreen:
                 self.menu_pane_pos.y -= 15
             else:
                 self.show_buttons = True
-                # self.key_pressed = False
         else:
-            self.show_buttons = False
-            if self.menu_pane_height - 30 >= self.MENU_PANE_START_HEIGHT:
-                self.menu_pane_height -= 30
-                self.menu_pane_pos.y += 15
-            else:
-                self.menu_pane_direct = "on"
-                self.start_menu_pane_animation = True
+            if self.last_player_selection_timestamp == 0 or (self.last_player_selection_timestamp > 0 and self.last_player_selection_timestamp + 0.5 < time.time()):
+                self.show_buttons = False
+                if self.menu_pane_height - 30 >= self.MENU_PANE_START_HEIGHT:
+                    self.menu_pane_height -= 30
+                    self.menu_pane_pos.y += 15
+                else:
+                    self.menu_pane_direct = "on"
+                    if self.current_screen == "player_select" and len(self.players) >= 4:
+                        self.current_screen = "controls"
+                    elif self.current_screen == "controls":
+                        self.screen_done = True
+                    elif self.current_screen == "positions":
+                        self.restart_game = True
+                    self.start_menu_pane_animation = True
 
     def draw_buttons(self):
         if self.current_screen == "numb_of_players":
@@ -258,8 +356,31 @@ class MenuScreen:
 
         elif self.current_screen == "player_select":
 
+            # draw player portraits f1
             for player in ["mar", "lui", "pea", "yos"]:
                 SCREEN.blit(self.player_select_images[player][0], self.player_select_pos[player])
+
+            # draw player portraits f2
+            if len(self.players) > 0:
+                for player in self.players:
+                    SCREEN.blit(self.player_select_images[player][1], self.player_select_pos[player])
+
+                # draw chosen player number on portrait
+                for pnum in range(1, len(self.players)+1):
+                    SCREEN.blit(self.fonts["player_select"][pnum][0], self.fonts["player_select"][pnum][1])
+
+            # draw player select rectangle
+            pygame.draw.rect(surface=SCREEN, color=(252, 252, 252), rect=pygame.Rect(int(self.player_select_pos[self.current_player].x), int(self.player_select_pos[self.current_player].y), 200, 100), width=4)
+
+        elif self.current_screen == "controls":
+
+            for i in range(1, self.numb_of_players + 1):
+                SCREEN.blit(self.player_controls_images[i], self.player_controls_pos[i])
+
+        elif self.current_screen == "positions":
+
+            for i in range(1, 5):
+                SCREEN.blit(self.player_pos_fonts[i][0], self.player_pos_fonts[i][1])
 
     def draw(self):
         # bg

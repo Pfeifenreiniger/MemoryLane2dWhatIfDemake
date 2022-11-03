@@ -51,8 +51,7 @@ class Main:
         menu_screen = MenuScreen()
         menu_press_space = PressSpace(menu_screen)
 
-        players = ["mar", "yos", "pea", "lui"]
-        vs_screen = VersusScreen(players)
+        shyguy = ShyGuy()
         canvas = pygame.Surface((800, 600))
         stage0 = Stage(0, canvas)
         stage1 = Stage(1, canvas)
@@ -61,19 +60,30 @@ class Main:
         stage4 = Stage(4, canvas)
         stage_objects = [stage1, stage2, stage3, stage4]
 
-        player1 = Player(players[0], 1, False)
-        player2 = Player(players[1], 2, False)
-        player3 = Player(players[2], 3, False)
-        player4 = Player(players[3], 4, False)
-        player_objects = [player1, player2, player3, player4]
-        shyguy = ShyGuy()
+        ingame_objects_loaded = False
 
-        camera1 = Camera(stage1, player1)
-        camera2 = Camera(stage2, player2)
-        camera3 = Camera(stage3, player3)
-        camera4 = Camera(stage4, player4)
+        def load_ingame_objects():
+            """Ingame objects which could change after a game restart. Therefore, a function to (re)load them."""
+            players = menu_screen.players
+            vs_screen = VersusScreen(players)
+
+            player1 = Player(players[0], 1, False)
+            player2 = Player(players[1], 2, False) if menu_screen.numb_of_players > 1 else Player(players[1], 2, True)
+            player3 = Player(players[2], 3, False) if menu_screen.numb_of_players > 2 else Player(players[2], 3, True)
+            player4 = Player(players[3], 4, False) if menu_screen.numb_of_players > 3 else Player(players[3], 4, True)
+            player_objects = [player1, player2, player3, player4]
+
+            camera1 = Camera(stage1, player1)
+            camera2 = Camera(stage2, player2)
+            camera3 = Camera(stage3, player3)
+            camera4 = Camera(stage4, player4)
+
+            return vs_screen, player_objects, camera1, camera2, camera3, camera4
+
 
         correct_tiles_reset = False
+
+        player_end_position = []
 
         running = True
 
@@ -93,7 +103,14 @@ class Main:
                 menu_screen.start_menu_pane_animation = True
                 if menu_screen.screen_done != True:
                     menu_screen.update()
+                    if menu_screen.restart_game:
+                        running = False
+                        Main.run_game()
                 else:
+                    if ingame_objects_loaded != True:
+                        vs_screen, player_objects, camera1, camera2, camera3, camera4 = load_ingame_objects()
+                        ingame_objects_loaded = True
+
                     if vs_screen.screen_done != True:
                         vs_screen.update()
                     else:
@@ -103,7 +120,7 @@ class Main:
                             stage0.get_correct_tiles(shyguy.my_path)
                             shyguy.update()
                         else:
-                            # resets the display of correct path tiles on the stage and transfers the path to the player
+                            # resets the display of correct path tiles on the stages and transfers the path to the player
                             if correct_tiles_reset != True:
                                 stage0.correct_tiles = []
 
@@ -123,7 +140,18 @@ class Main:
                                 counter += 1
 
                             Main.draw_4_way_split_screen_lines()
-                            # stage0.get_correct_tiles(player1.my_tile_path)
+
+                            # checking if a player reached the last tile -> if yes, add him to the position list
+                            for p in player_objects:
+                                if p.my_tile_path[-1] == 51 and p.pnum not in player_end_position:
+                                    player_end_position.append(p.pnum)
+                            # if all 4 players arrived the goal (tile 51) > game ends
+                            if len(player_end_position) >= 4:
+
+                                menu_screen.current_screen = "positions"
+                                menu_screen.menu_pane_direct = "on"
+                                menu_screen.load_player_positions(player_end_position)
+                                menu_screen.screen_done = False
 
             pygame.display.set_caption("Memory Lane 2D What-If-Demake | " + str(round(clock.get_fps())) + " FPS")
             pygame.display.update()

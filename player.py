@@ -9,6 +9,7 @@ SHADOW_SPRITE_ORIG_SCALE = (68, 25)
 
 class Player(ShyGuy):
     def __init__(self, char:str, pnum:int, cpu:bool):
+        self.cpu = cpu
         self.sprites = self.load_sprites("graphics/player", char)
         self.pnum = pnum
         self.x = 365
@@ -64,8 +65,9 @@ class Player(ShyGuy):
                 self.current_dir = "run_right"
                 self.key_pressed = True
 
+        # manual player control
         self.keys = pygame.key.get_pressed()
-        if self.arrived != True:
+        if self.arrived != True and self.cpu != True:
             # player 1: w a d
             if self.pnum == 1:
                 if self.key_pressed != True:
@@ -114,6 +116,21 @@ class Player(ShyGuy):
                     # 6 -> RIGHT
                     elif self.keys[pygame.K_KP6]:
                         run_right()
+
+        # cpu random control
+        if self.cpu and self.arrived != True:
+
+            if self.key_pressed != True:
+
+                random_run_function = [run_up, run_left, run_right]
+                if len(self.my_tile_path) > 1:
+                    if self.my_tile_path[-1] - 1 == self.my_tile_path[-2]:
+                        random_run_function = [run_up, run_right]
+                    elif self.my_tile_path[-1] + 1 == self.my_tile_path[-2]:
+                        random_run_function = [run_up, run_left]
+
+                random_direct = lambda func : func()
+                random_direct(random.choice(random_run_function))
 
     def movement(self):
 

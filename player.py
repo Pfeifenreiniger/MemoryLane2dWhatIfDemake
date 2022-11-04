@@ -1,5 +1,6 @@
 
-from main import pygame, SCREEN, random
+import time
+from main import pygame, random
 from stage import ShyGuy
 from tiles_field_borders import borders
 
@@ -39,6 +40,7 @@ class Player(ShyGuy):
         self.key_pressed = False
         self.arrived = False # sobald arrived=True ist der Spieler am Ziel angekommen, wird bei movement() umgestellt
         self.spawned = False
+        self.spawned_timestamp = time.time()
         self.offset = pygame.math.Vector2(0, 0)
         if self.pnum == 1 or self.pnum == 2:
             self.offset = pygame.math.Vector2(200, 300)
@@ -72,10 +74,10 @@ class Player(ShyGuy):
 
         # manual player control
         self.keys = pygame.key.get_pressed()
-        if self.arrived != True and self.cpu != True:
-            # player 1: w a d
-            if self.pnum == 1:
-                if self.key_pressed != True:
+        if self.key_pressed != True and self.spawned != True:
+            if self.arrived != True and self.cpu != True:
+                # player 1: w a d
+                if self.pnum == 1:
                     # W -> UP
                     if self.keys[pygame.K_w]:
                         run_up()
@@ -85,9 +87,8 @@ class Player(ShyGuy):
                     # D -> RIGHT
                     elif self.keys[pygame.K_d]:
                         run_right()
-            # player 2: i j k
-            elif self.pnum == 2:
-                if self.key_pressed != True:
+                # player 2: i j k
+                elif self.pnum == 2:
                     # I -> UP
                     if self.keys[pygame.K_i]:
                         run_up()
@@ -97,9 +98,8 @@ class Player(ShyGuy):
                     # K -> RIGHT
                     elif self.keys[pygame.K_k]:
                         run_right()
-            # player 3: arrow keys
-            elif self.pnum == 3:
-                if self.key_pressed != True:
+                # player 3: arrow keys
+                elif self.pnum == 3:
                     # ARROW UP -> UP
                     if self.keys[pygame.K_UP]:
                         run_up()
@@ -109,9 +109,8 @@ class Player(ShyGuy):
                     # ARROW RIGHT -> RIGHT
                     elif self.keys[pygame.K_RIGHT]:
                         run_right()
-            # player 4: num pad 8 4 6
-            elif self.pnum == 4:
-                if self.key_pressed != True:
+                # player 4: num pad 8 4 6
+                elif self.pnum == 4:
                     # 8 -> UP
                     if self.keys[pygame.K_KP8]:
                         run_up()
@@ -121,12 +120,8 @@ class Player(ShyGuy):
                     # 6 -> RIGHT
                     elif self.keys[pygame.K_KP6]:
                         run_right()
-
-        # cpu random control
-        if self.cpu and self.arrived != True:
-
-            if self.key_pressed != True:
-
+            # cpu random control
+            elif self.cpu and self.arrived != True:
                 random_run_function = [run_up, run_left, run_right]
                 if len(self.my_tile_path) > 1:
                     if self.my_tile_path[-1] - 1 == self.my_tile_path[-2]:
@@ -136,6 +131,9 @@ class Player(ShyGuy):
 
                 random_direct = lambda func : func()
                 random_direct(random.choice(random_run_function))
+        if self.spawned:
+            if round(time.time(), 1) > round(self.spawned_timestamp, 1) + 0.2:
+                self.spawned = False
 
     def movement(self):
 
@@ -226,7 +224,7 @@ class Player(ShyGuy):
                 self.current_sprites[frame] = pygame.transform.scale(self.current_sprites[frame], (self.current_sprites[frame].get_width() // 3, self.current_sprites[frame].get_height()))
             self.draw()
             sfx_teleport.play()
-            self.spawned = False
+            self.spawned_timestamp = time.time()
 
         spawn_animation()
 
@@ -257,8 +255,4 @@ class Player(ShyGuy):
         self.player_input()
         self.movement()
         self.draw()
-        # print(self.x)
-        # print(self.y)
-        # print("ROW", self.current_row)
-        # print("TILE", self.current_tile)
-        # print("COLUMN", self.current_column)
+

@@ -5,11 +5,21 @@ Imagine Nintendo's Super Mario IP would have been heavily influenced by the 1993
 (https://en.wikipedia.org/wiki/Super_Mario_Bros._(film)) and the Mario Party games would more be like a kind of
 violent battle royal as seen in the 1987 movie The Running Man (https://en.wikipedia.org/wiki/The_Running_Man_(1987_film)).
 
-Code and graphics by Kevin Spathmann (Pfeifenreiniger on GitHub: https://github.com/Pfeifenreiniger)
+Code and graphics by Kevin Spathmann (Pfeifenreiniger at GitHub: https://github.com/Pfeifenreiniger)
+
 Fonts used:
     Masheen from fontsov.com (https://fontsov.com/font/masheen21695.html)
     Dirtchunk from Priotitype (https://www.fontspace.com/dirtchunk-font-f56491)
-Musics, SFX, and voices used ????
+
+Musics, SFX, and voices used:
+    Music...
+        Main Menu:  Cyberpunk 2077 - Chippin' In by SAMURAI (8-bit cover by tonythehero)
+        Stage:      Aim To Head - Heroez
+                    (alternatively after entering the 'Konami Code' in Press Space screen: Mario Party 6 - Slow and Steady (8-bit cover) (made with GXSCC))
+        Ranking:    FainGames - Cyberpunk 8-bit Relaxing Music
+    SFX...
+        Menus and Stage:    Various sound files from the sfx library provided by SubspaceAudio at OpenGameArt.org (https://opengameart.org/content/512-sound-effects-8-bit-style)
+
 Original Game (included in Mario Party 6) by Hudson Soft™ and Nintendo™
 '''
 
@@ -20,9 +30,8 @@ pygame.init()
 
 SCREEN = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Memory Lane 2D What-If-Demake")
-#TODO: Create an icon
-# ICON = pygame.image.load("graphics/game_icon.png").convert_alpha()
-# pygame.display.set_icon(ICON)
+ICON = pygame.image.load("graphics/icon.png").convert_alpha()
+pygame.display.set_icon(ICON)
 clock = pygame.time.Clock()
 FPS = 30
 
@@ -46,6 +55,24 @@ class Main:
         from stage import Stage, ShyGuy
         from player import Player
         from camera import Camera
+
+        #----loading music----#
+        menu_music = pygame.mixer.Sound("music/menu/Cyberpunk 2077 - Chippin’ In by SAMURAI (8-bit cover by tonythehero).wav")
+        menu_music.set_volume(1)
+        menu_music_to_play = True
+        menu_music_started = False
+
+        stage_music_1 = pygame.mixer.Sound("music/stage/Aim To Head - Heroez.wav")
+        stage_music_1.set_volume(0.8)
+        stage_music_2 = pygame.mixer.Sound("music/stage/Mario Party 6 - Slow and Steady (8-bit cover).WAV")
+        stage_music_2.set_volume(0.8)
+        stage_music_to_play = False
+        stage_music_started = False
+
+        ranking_music = pygame.mixer.Sound("music/ranking/FainGames - Cyberpunk 8-bit Relaxing Music.wav")
+        ranking_music.set_volume(1)
+        ranking_music_to_play = False
+        ranking_music_started = False
 
         #----loading objects----#
         menu_screen = MenuScreen()
@@ -94,6 +121,26 @@ class Main:
                     running = False
                     pygame.quit()
                     sys.exit()
+
+            # music control
+            if menu_music_to_play and menu_music_started != True:
+                menu_music.play(loops=-1)
+                menu_music_started = True
+            elif stage_music_to_play and stage_music_started != True:
+                menu_music.stop()
+                if menu_press_space.konami_code:
+                    stage_music_2.play(loops=-1)
+                else:
+                    stage_music_1.play(loops=-1)
+                stage_music_started = True
+            elif ranking_music_to_play and ranking_music_started != True:
+                if menu_press_space.konami_code:
+                    stage_music_2.stop()
+                else:
+                    stage_music_1.stop()
+                ranking_music.play(loops=-1)
+                ranking_music_started = True
+
             # first start: press select screen
             if menu_press_space.screen_done != True:
                 menu_press_space.update()
@@ -104,6 +151,8 @@ class Main:
                 if menu_screen.screen_done != True:
                     menu_screen.update()
                     if menu_screen.restart_game:
+                        ranking_music_to_play = False
+                        ranking_music.stop()
                         running = False
                         Main.run_game()
                 else:
@@ -114,6 +163,8 @@ class Main:
                     if vs_screen.screen_done != True:
                         vs_screen.update()
                     else:
+                        menu_music_to_play = False
+                        stage_music_to_play = True
                         # let shyguy walk across the generated path until he arrives tile 51
                         if len(shyguy.my_path) < 1 or shyguy.my_path[-1] != 51:
                             stage0.draw_elements()
@@ -152,6 +203,8 @@ class Main:
                                 menu_screen.menu_pane_direct = "on"
                                 menu_screen.load_player_positions(player_end_position)
                                 menu_screen.screen_done = False
+                                stage_music_to_play = False
+                                ranking_music_to_play = True
 
             pygame.display.set_caption("Memory Lane 2D What-If-Demake | " + str(round(clock.get_fps())) + " FPS")
             pygame.display.update()

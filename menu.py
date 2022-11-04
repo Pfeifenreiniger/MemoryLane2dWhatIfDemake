@@ -4,10 +4,24 @@ from fonts import FONT_PRESS_START_20, FONT_PRESS_START_30
 
 import time
 
+#-----MENU SFX-----#
+sfx_menu_move =pygame.mixer.Sound("sfx/menu/menu_move.wav")
+sfx_menu_move.set_volume(0.5)
+
+sfx_pressed_space = pygame.mixer.Sound("sfx/menu/pressed_space.wav")
+sfx_pressed_space.set_volume(0.6)
+
+sfx_screen_done = pygame.mixer.Sound("sfx/menu/screen_done.wav")
+sfx_screen_done.set_volume(0.6)
+
+sfx_char_selected = pygame.mixer.Sound("sfx/menu/char_selected.wav")
+sfx_char_selected.set_volume(0.6)
+
 class PressSpace:
     def __init__(self, menu_screen):
         self.menu_screen = menu_screen
         self.key_pressed = False
+        self.key_pressed_timestamp = time.time()
         self.font = FONT_PRESS_START_30
         self.left_gate_pos = pygame.math.Vector2(x=0, y=0)
         self.right_gate_pos = pygame.math.Vector2(x=46, y=16)
@@ -19,6 +33,9 @@ class PressSpace:
         self.font_animation_counter = 0
         self.logo_animation_counter = 0
         self.logo_animation_forward = True
+        self.correct_konami_code_keys = ["U", "U", "D", "D", "L", "R", "L", "R", "B", "A"]
+        self.konami_code_keys = []
+        self.konami_code = False
         self.screen_done = False
 
     def load_graphics(self):
@@ -40,11 +57,38 @@ class PressSpace:
         self.font_rect = self.font_surf.get_rect(center=(400, 480))
 
     def event_listen(self):
+
+        def stamp_time_key_press():
+            self.key_pressed = True
+            self.key_pressed_timestamp = time.time()
+
         if self.key_pressed != True:
             self.keys = pygame.key.get_pressed()
             if self.keys[pygame.K_SPACE]:
                 self.start_gate_animation = True
-                self.key_pressed = True
+                sfx_pressed_space.play()
+                stamp_time_key_press()
+            elif self.keys[pygame.K_UP]:
+                self.konami_code_keys.append("U")
+                stamp_time_key_press()
+            elif self.keys[pygame.K_DOWN]:
+                self.konami_code_keys.append("D")
+                stamp_time_key_press()
+            elif self.keys[pygame.K_LEFT]:
+                self.konami_code_keys.append("L")
+                stamp_time_key_press()
+            elif self.keys[pygame.K_RIGHT]:
+                self.konami_code_keys.append("R")
+                stamp_time_key_press()
+            elif self.keys[pygame.K_a]:
+                self.konami_code_keys.append("A")
+                stamp_time_key_press()
+            elif self.keys[pygame.K_b]:
+                self.konami_code_keys.append("B")
+                stamp_time_key_press()
+        else:
+            if round(time.time(), 1) > round(self.key_pressed_timestamp, 1)+0.2 and self.start_gate_animation != True:
+                self.key_pressed = False
 
     def font_animation(self):
         self.font_animation_counter += 0.02
@@ -78,6 +122,62 @@ class PressSpace:
         else:
             self.logo_animation_counter -= 0.2
 
+    def check_if_konami_code(self):
+
+        if self.konami_code != True:
+            corr_keys = 0
+
+            possible_konami_code = []
+
+            for key in self.konami_code_keys:
+
+                if corr_keys == 0:
+                    if key == self.correct_konami_code_keys[0]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 1:
+                    if key == self.correct_konami_code_keys[1]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 2:
+                    if key == self.correct_konami_code_keys[2]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 3:
+                    if key == self.correct_konami_code_keys[3]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 4:
+                    if key == self.correct_konami_code_keys[4]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 5:
+                    if key == self.correct_konami_code_keys[5]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 6:
+                    if key == self.correct_konami_code_keys[6]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 7:
+                    if key == self.correct_konami_code_keys[7]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 8:
+                    if key == self.correct_konami_code_keys[8]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                elif corr_keys == 9:
+                    if key == self.correct_konami_code_keys[9]:
+                        possible_konami_code.append(key)
+                        corr_keys += 1
+                else:
+                    corr_keys = 0
+                    possible_konami_code = []
+
+                if self.correct_konami_code_keys == possible_konami_code:
+                    self.konami_code = True
+                    break
 
     def draw(self):
 
@@ -106,8 +206,11 @@ class PressSpace:
         self.draw()
         self.font_animation()
 
+        if len(self.konami_code_keys) >= 10:
+            self.check_if_konami_code()
+
         if self.check_if_done():
-            self.__init__(self.menu_screen)
+            # self.__init__(self.menu_screen)
             self.screen_done = True
 
 
@@ -250,11 +353,14 @@ class MenuScreen:
                 if self.current_screen == "numb_of_players":
                     self.current_screen = "player_select"
                     self.menu_pane_direct = "off"
+                    sfx_screen_done.play()
                 elif self.current_screen == "player_select" and len(self.players) < 4:
                     if len(self.players) < 3:
                         self.players.append(self.current_player)
+                        sfx_char_selected.play()
                     else:
                         self.players.append(self.current_player)
+                        sfx_char_selected.play()
                         self.last_player_selection_timestamp = time.time()
                         self.menu_pane_direct = "off"
                     x_offset = 5
@@ -266,44 +372,56 @@ class MenuScreen:
                     self.fonts["player_select"][len(self.players)].append(self.fonts["player_select"][len(self.players)][0].get_rect(topleft=pnum_pos))
                 elif self.current_screen == "controls":
                     self.menu_pane_direct = "off"
+                    sfx_screen_done.play()
                 elif self.current_screen == "positions":
                     self.menu_pane_direct = "off"
+                    sfx_screen_done.play()
                 stamp_time_key_press()
-            if self.keys[pygame.K_ESCAPE]:
+            elif self.keys[pygame.K_ESCAPE]:
                 self.players.clear()
             elif self.keys[pygame.K_UP]:
                 if self.current_screen == "numb_of_players":
                     if self.numb_of_players > 1:
                         self.numb_of_players -= 1
+                        sfx_menu_move.play()
                 elif self.current_screen == "player_select":
                     if self.current_player == "pea":
                         self.current_player = "mar"
+                        sfx_menu_move.play()
                     elif self.current_player == "yos":
                         self.current_player = "lui"
+                        sfx_menu_move.play()
                 stamp_time_key_press()
             elif self.keys[pygame.K_DOWN]:
                 if self.current_screen == "numb_of_players":
                     if self.numb_of_players < 4:
                         self.numb_of_players += 1
+                        sfx_menu_move.play()
                 elif self.current_screen == "player_select":
                     if self.current_player == "mar":
                         self.current_player = "pea"
+                        sfx_menu_move.play()
                     elif self.current_player == "lui":
                         self.current_player = "yos"
+                        sfx_menu_move.play()
                 stamp_time_key_press()
             elif self.keys[pygame.K_RIGHT]:
                 if self.current_screen == "player_select":
                     if self.current_player == "mar":
                         self.current_player = "lui"
+                        sfx_menu_move.play()
                     elif self.current_player == "pea":
                         self.current_player = "yos"
+                        sfx_menu_move.play()
                 stamp_time_key_press()
             elif self.keys[pygame.K_LEFT]:
                 if self.current_screen == "player_select":
                     if self.current_player == "lui":
                         self.current_player = "mar"
+                        sfx_menu_move.play()
                     elif self.current_player == "yos":
                         self.current_player = "pea"
+                        sfx_menu_move.play()
                 stamp_time_key_press()
 
         else:
@@ -333,6 +451,7 @@ class MenuScreen:
                     self.menu_pane_direct = "on"
                     if self.current_screen == "player_select" and len(self.players) >= 4:
                         self.current_screen = "controls"
+                        sfx_screen_done.play()
                     elif self.current_screen == "controls":
                         self.screen_done = True
                     elif self.current_screen == "positions":

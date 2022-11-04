@@ -7,6 +7,11 @@ from tiles_field_borders import borders
 PLAYER_SPRITE_ORIG_SCALE = (68, 75)
 SHADOW_SPRITE_ORIG_SCALE = (68, 25)
 
+
+#-----PLAYER SFX-----#
+sfx_teleport =pygame.mixer.Sound("sfx/stage/teleport.wav")
+sfx_teleport.set_volume(0.3)
+
 class Player(ShyGuy):
     def __init__(self, char:str, pnum:int, cpu:bool):
         self.cpu = cpu
@@ -220,6 +225,7 @@ class Player(ShyGuy):
             for frame in self.current_sprites.keys():
                 self.current_sprites[frame] = pygame.transform.scale(self.current_sprites[frame], (self.current_sprites[frame].get_width() // 3, self.current_sprites[frame].get_height()))
             self.draw()
+            sfx_teleport.play()
             self.spawned = False
 
         spawn_animation()

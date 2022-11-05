@@ -23,7 +23,7 @@ Musics, SFX, and voices used:
 Original Game (included in Mario Party 6) by Hudson Soft™ and Nintendo™
 '''
 
-import pygame, sys, random
+import pygame, sys, random, gc
 pygame.init()
 
 ##----------------------------DISPLAY SCREEN----------------------------##
@@ -107,6 +107,9 @@ class Main:
 
             return vs_screen, player_objects, camera1, camera2, camera3, camera4
 
+        def delete_objects(*objects):
+            for obj in objects:
+                del obj
 
         correct_tiles_reset = False
 
@@ -119,6 +122,7 @@ class Main:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    gc.collect()
                     pygame.quit()
                     sys.exit()
 
@@ -154,6 +158,8 @@ class Main:
                         ranking_music_to_play = False
                         ranking_music.stop()
                         running = False
+                        delete_objects(vs_screen, player_objects, camera1, camera2, camera3, camera4, menu_screen, menu_press_space, shyguy, canvas, stage0, stage1, stage2, stage3, stage4, stage_objects)
+                        gc.collect()
                         Main.run_game()
                 else:
                     if ingame_objects_loaded != True:

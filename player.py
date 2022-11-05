@@ -219,7 +219,7 @@ class Player(ShyGuy):
 
         def spawn_animation():
             self.spawned = True
-            self.x += self.current_sprites[1].get_width() // 3
+            self.x += (self.current_sprites[1].get_width() // 3) * 3
             for frame in self.current_sprites.keys():
                 self.current_sprites[frame] = pygame.transform.scale(self.current_sprites[frame], (self.current_sprites[frame].get_width() // 3, self.current_sprites[frame].get_height()))
             self.draw()
